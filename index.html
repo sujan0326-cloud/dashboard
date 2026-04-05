@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>입고 특이사항 대시보드 | 2026년 3월</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gridstack.js/10.3.1/gridstack.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gridstack.js/10.3.1/gridstack-all.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans KR','DM Sans',sans-serif;background:#eceae5;color:#2c2c2c;-webkit-font-smoothing:antialiased;font-size:13px}
+
+.topbar{background:#2c2c2c;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:48px;position:sticky;top:0;z-index:100}
+.topbar>*{max-width:1280px}
+.topbar{justify-content:center;gap:0}
+.topbar-inner{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:1280px}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.topbar-logo{width:28px;height:28px;background:#4a6fa5;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.topbar-logo svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2}
+.topbar-title{font-size:16px;font-weight:700;color:#fff;font-family:'DM Sans'}
+.topbar-sub{font-size:13px;color:#666;margin-left:4px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.tb{font-size:10px;padding:4px 12px;border-radius:12px;border:1px solid #555;background:transparent;color:#888;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.tb:hover{border-color:#888;color:#ccc}
+.tb.on{background:#4a6fa5;border-color:#4a6fa5;color:#fff}
+
+.filterbar{background:#fff;border-bottom:1px solid #ddd9d3;padding:10px 24px;display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;position:sticky;top:48px;z-index:99;max-width:1280px;margin:0 auto}
+.filterbar-bg{background:#fff;border-bottom:1px solid #ddd9d3;position:sticky;top:48px;z-index:99}
+.fg{display:flex;align-items:center;gap:6px}
+.fl{font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.8px}
+.cal-toggle{font-size:12px;padding:5px 12px;border-radius:4px;border:1px solid #ddd9d3;background:#faf9f7;cursor:pointer;font-family:inherit;font-weight:500;display:flex;align-items:center;gap:6px}
+.cal-popup{position:absolute;top:100%;left:0;background:#fff;border:1px solid #ddd9d3;border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,0.12);padding:14px;z-index:1000;width:300px;display:none}
+.cal-popup.open{display:block}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:4px}
+.cal-nav-btn{width:28px;height:28px;border:1px solid #e0e0e0;background:#fafafa;border-radius:4px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;color:#666;transition:all 0.15s;font-family:inherit}
+.cal-nav-btn:hover{background:#e4ecf4;border-color:#4a6fa5;color:#4a6fa5}
+.cal-nav-label{font-size:13px;font-weight:700;color:#2c2c2c;min-width:100px;text-align:center}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+.cal-dow{font-size:9px;font-weight:600;color:#999;padding:4px 0}
+.cal-day{font-size:11px;padding:6px 2px;border-radius:4px;cursor:pointer;transition:all 0.12s;position:relative}
+.cal-day:hover{background:#e4ecf4}
+.cal-day.selected{background:#4a6fa5;color:#fff;font-weight:600}
+.cal-day.has-data::after{content:"";position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:#d4915e}
+.cal-day.selected.has-data::after{background:#fff}
+.cal-day.empty{color:#ddd;pointer-events:none}
+.cal-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid #eee;align-items:center}
+.cal-sel-info{font-size:10px;color:#888;margin-left:auto}
+.cal-apply{font-size:11px;padding:5px 16px;border-radius:4px;border:none;background:#4a6fa5;color:#fff;cursor:pointer;font-family:inherit;font-weight:600;transition:background 0.2s}
+.cal-apply:hover{background:#3d5f8f}
+.cbtn{font-size:10px;padding:4px 10px;border-radius:3px;border:1px solid #ddd;background:#fff;cursor:pointer;font-family:inherit}
+.cbtn.p{background:#4a6fa5;color:#fff;border-color:#4a6fa5}
+.bp{font-size:10px;padding:4px 10px;border-radius:12px;border:1px solid #ddd9d3;background:#fff;color:#6b6b6b;cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:4px;font-family:inherit}
+.bp.active{font-weight:600}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.bcap{font-size:11px;font-weight:600;padding:7px 16px;border-radius:4px;border:none;background:#4a6fa5;color:#fff;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px}
+.bcap:hover{background:#3d5f8f}
+.bcap:disabled{background:#bbb;cursor:wait}
+.bsm{font-size:9px;color:#4a6fa5;background:none;border:none;cursor:pointer;text-decoration:underline;font-family:inherit}
+
+/* Dashboard / GridStack */
+.dashboard{padding:12px 16px 20px;max-width:1280px;margin:0 auto}
+
+.gs-item-content{background:#fff;border-radius:6px;border:1px solid #ddd9d3;padding:14px 18px;box-shadow:0 1px 3px rgba(0,0,0,0.03);height:100%;overflow:auto;position:relative}
+
+.grid-stack .grid-stack-item{transition:none !important}
+.grid-stack .gs-item-content:hover{box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+
+/* Resize handle */
+.grid-stack > .grid-stack-item > .ui-resizable-se{width:16px;height:16px;right:4px;bottom:4px;background:none;cursor:se-resize}
+.grid-stack > .grid-stack-item > .ui-resizable-se::after{content:"";position:absolute;right:2px;bottom:2px;width:8px;height:8px;border-right:2px solid #ccc;border-bottom:2px solid #ccc}
+.grid-stack > .grid-stack-item:hover > .ui-resizable-se::after{border-color:#999}
+
+/* Card hide button */
+.card-x{position:absolute;top:6px;right:8px;width:22px;height:22px;border-radius:4px;border:1px solid #e8e8e8;background:#fafafa;cursor:pointer;font-size:10px;display:none;align-items:center;justify-content:center;color:#bbb;z-index:5;transition:all 0.15s}
+.card-x:hover{background:#f0e0e0;color:#c0625a;border-color:#e0c0c0}
+body.editing .card-x{display:flex}
+
+/* Card Titles */
+.ct{font-size:13px;font-weight:700;color:#2c2c2c;margin-bottom:10px;display:flex;align-items:center;gap:6px;line-height:1.3;cursor:default}
+.ct .sub{font-size:10px;font-weight:400;color:#999;margin-left:4px}
+.editable-sub{font-size:10px;font-weight:400;color:#888;padding:1px 4px;border-radius:2px;outline:none}
+body.editing .editable-sub[contenteditable=true]{background:#fef9e7;border:1px dashed #d4915e}
+
+/* Components */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.kpi-box{background:#faf9f7;border-radius:5px;padding:12px 14px;border:1px solid #eee}
+.kpi-label{font-size:10px;font-weight:600;color:#aaa;letter-spacing:0.3px}
+.kpi-value{font-size:26px;font-weight:700;line-height:1.1;margin-top:4px;font-family:'DM Sans'}
+.kpi-sub{font-size:10px;color:#aaa;margin-top:2px}
+.br{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.bl{min-width:88px;text-align:right;font-size:11px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bt{flex:1;height:18px;background:#f2f0ec;border-radius:3px;overflow:hidden}
+.bf{height:100%;border-radius:3px;transition:width 0.4s ease}
+.bv{min-width:48px;text-align:right;font-size:11px;font-weight:600;color:#555}
+.bpc{min-width:32px;text-align:right;font-size:10px;color:#aaa}
+.dt{width:100%;border-collapse:collapse;font-size:11px}
+.dt th{text-align:left;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:#aaa;padding:5px 6px;border-bottom:2px solid #ddd9d3}
+.dt th.r{text-align:right}.dt th.c{text-align:center}
+.dt td{padding:6px;border-bottom:1px solid #f3f1ed}.dt td.r{text-align:right}.dt td.c{text-align:center}
+.dt tr:hover td{background:#fdfcfa}
+.rk{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:9px;font-weight:700}
+.rk1{background:#f8e8e7;color:#b85450}.rk2{background:#fce8e6;color:#c06050}.rk3{background:#fdf3eb;color:#c49e3c}.rkn{background:#f5f5f3;color:#bbb}
+.tg{display:inline-block;font-size:9px;font-weight:500;padding:2px 7px;border-radius:3px}
+.at{display:inline-block;font-size:9px;font-weight:600;padding:2px 8px;border-radius:3px;background:#f8e8e7;color:#b85450}
+
+.trend-c{display:flex;align-items:flex-end;gap:2px;height:110px;padding:6px 0}
+.trend-col{flex:1;display:flex;flex-direction:column;align-items:center}
+.trend-bw{display:flex;flex-direction:column;align-items:center;height:80px;justify-content:flex-end;width:100%}
+.trend-bar{width:70%;min-width:6px;border-radius:3px 3px 0 0;transition:height 0.4s}
+.trend-val{font-size:9px;font-weight:700;color:#555;min-height:13px;margin-bottom:1px}
+.trend-date{font-size:7px;color:#999;margin-top:2px;font-weight:500}
+
+.rr{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f3f1ed}
+.rr:last-child{border:none}
+.rc{font-size:20px;font-weight:700;color:#b85450;min-width:30px;text-align:center;font-family:'DM Sans'}
+.ri{flex:1}.rn{font-size:12px;font-weight:600}.rd{font-size:10px;color:#888;margin-top:1px}
+.rq{font-size:12px;font-weight:700;color:#555;min-width:55px;text-align:right}
+
+.df{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.ds{font-size:11px;padding:3px 22px 3px 6px;border-radius:3px;border:1px solid #ddd9d3;background:#faf9f7;font-family:inherit;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23999'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 5px center;cursor:pointer}
+
+/* Hidden cards restore */
+.hidden-bar{background:#fef9e7;border:1px dashed #d4915e;border-radius:6px;padding:8px 14px;margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hidden-bar span{font-size:10px;font-weight:600;color:#c49e3c}
+.hidden-bar button{font-size:10px;padding:3px 10px;border-radius:12px;border:1px solid #d4915e;background:#fff;color:#c49e3c;cursor:pointer;font-family:inherit}
+.hidden-bar button:hover{background:#fef3dd}
+
+/* Detail mini-calendar */
+.dcal-wrap{position:relative;display:inline-block}
+.dcal-toggle{font-size:10px;padding:3px 10px;border-radius:3px;border:1px solid #ddd9d3;background:#faf9f7;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:4px}
+.dcal-popup{position:absolute;top:100%;left:0;background:#fff;border:1px solid #ddd9d3;border-radius:6px;box-shadow:0 6px 20px rgba(0,0,0,0.12);padding:10px;z-index:1000;width:240px;display:none}
+.dcal-popup.open{display:block}
+.dcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;text-align:center}
+.dcal-dow{font-size:8px;font-weight:600;color:#999;padding:3px 0}
+.dcal-day{font-size:10px;padding:4px 1px;border-radius:3px;cursor:pointer;transition:all 0.1s}
+.dcal-day:hover{background:#e4ecf4}
+.dcal-day.sel{background:#4a6fa5;color:#fff;font-weight:600}
+.dcal-day.nodata{color:#ddd;pointer-events:none}
+.dcal-actions{display:flex;gap:4px;margin-top:6px;padding-top:6px;border-top:1px solid #eee}
+
+.footer{text-align:center;padding:12px 0;color:#aaa;font-size:9px}
+
+/* Drop Zone */
+.drop-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(74,111,165,0.08);z-index:9999;align-items:center;justify-content:center}
+.drop-overlay.show{display:flex}
+.drop-box{background:#fff;border:3px dashed #4a6fa5;border-radius:16px;padding:60px 80px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,0.15)}
+.drop-box-icon{font-size:48px;margin-bottom:12px;color:#4a6fa5}
+.drop-box-title{font-size:18px;font-weight:700;color:#2c2c2c;margin-bottom:6px}
+.drop-box-sub{font-size:12px;color:#888}
+
+/* Upload bar */
+.upload-bar{display:flex;align-items:center;gap:8px;padding:2px 0}
+.upload-btn{font-size:10px;padding:4px 12px;border-radius:4px;border:1px solid #4a6fa5;background:#e4ecf4;color:#4a6fa5;cursor:pointer;font-family:inherit;font-weight:600;display:flex;align-items:center;gap:4px;transition:all 0.15s}
+.upload-btn:hover{background:#4a6fa5;color:#fff}
+.upload-info{font-size:10px;color:#888}
+.upload-file{font-size:10px;color:#4a6fa5;font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- Drop Zone Overlay -->
+<div class="drop-overlay" id="dropOverlay">
+  <div class="drop-box">
+    <div class="drop-box-icon"><svg width="48" height="48" fill="none" stroke="#4a6fa5" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg></div>
+    <div class="drop-box-title">엑셀 파일을 여기에 놓으세요</div>
+    <div class="drop-box-sub">입고 특이사항 엑셀 파일 (.xlsx)을 드래그하면 자동으로 데이터가 반영됩니다</div>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-inner">
+  <div class="topbar-left">
+    <div class="topbar-logo"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+    <span class="topbar-title">입고 특이사항</span>
+    <span class="topbar-sub">| 대시보드</span>
+  </div>
+  <div class="topbar-right">
+    <span style="font-size:11px;color:#777" id="topDate">2026년 3월</span>
+    <button class="tb" id="editBtn" onclick="toggleEdit()">편집 모드</button>
+    <button class="tb" id="resetBtn" onclick="resetLayout()" style="display:none">배치 초기화</button>
+    <button class="bcap" id="capBtn" onclick="doCapture()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>캡처</button>
+  </div>
+  </div>
+</div>
+
+<div class="filterbar-bg">
+<div class="filterbar">
+  <div class="fg"><span class="fl">날짜</span>
+    <div style="position:relative"><button class="cal-toggle" id="calToggle" onclick="toggleCal()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="calLabel">전체 (3월)</span></button><div class="cal-popup" id="calPopup"></div></div>
+  </div>
+  <div class="fg"><span class="fl">브랜드</span><div id="bfDiv"></div><button class="bsm" id="bReset" style="display:none" onclick="clrBr()">초기화</button></div>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+    <div class="upload-bar">
+      <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="handleFile(this.files[0])">
+      <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
+        엑셀 업로드
+      </button>
+      <span class="upload-info" id="uploadInfo">또는 파일을 화면에 드래그</span>
+    </div>
+    <span style="font-size:11px;color:#6b6b6b;font-weight:500" id="fInfo"></span>
+  </div>
+</div>
+</div>
+
+<div class="dashboard" id="captureArea">
+  <div id="hiddenBar"></div>
+  <div class="grid-stack" id="gs"></div>
+  <div class="footer">엑셀 파일을 화면에 드래그하거나 [엑셀 업로드] 버튼으로 데이터 갱신 · 편집 모드에서 카드 배치/크기 조절 · [캡처] 버튼으로 PNG</div>
+</div>
+
+<script>
+// ═══ DATA ═══
+let RAW=[{d:"03/03",brand:"K2",sup:"더 코어",cat:"용품",ret:true,qty:10,type:"박스바코드"},{d:"03/03",brand:"K2",sup:"아이케이지",cat:"의류",ret:true,qty:6,type:"RFID"},{d:"03/03",brand:"EIDER",sup:"피앤지아이엔씨",cat:"용품",ret:true,qty:43,type:"사이즈교차"},{d:"03/03",brand:"DYNAFIT",sup:"아이보리",cat:"의류",ret:false,qty:80,type:"전산오류"},{d:"03/03",brand:"DYNAFIT",sup:"서흥",cat:"신발",ret:true,qty:45,type:"박스바코드"},{d:"03/03",brand:"DYNAFIT",sup:"서흥",cat:"신발",ret:true,qty:908,type:"사이즈교차"},{d:"03/03",brand:"NORDISK",sup:"비하임",cat:"의류",ret:false,qty:65,type:"미입고"},{d:"03/03",brand:"WIDE ANGLE",sup:"유림호시",cat:"의류",ret:false,qty:944,type:"통관지연"},{d:"03/04",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:1,type:"QC불량"},{d:"03/04",brand:"K2",sup:"애드포스",cat:"신발",ret:false,qty:1128,type:"전산오류"},{d:"03/04",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:true,qty:7,type:"QC불량"},{d:"03/04",brand:"EIDER",sup:"현대케미칼",cat:"의류",ret:true,qty:794,type:"QC불량"},{d:"03/04",brand:"EIDER",sup:"현대케미칼",cat:"의류",ret:true,qty:45,type:"QC불량"},{d:"03/04",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:false,qty:2053,type:"통관지연"},{d:"03/04",brand:"WIDE ANGLE",sup:"유림호시",cat:"의류",ret:true,qty:2,type:"RFID"},{d:"03/05",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:504,type:"QC불량"},{d:"03/06",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:544,type:"QC불량"},{d:"03/06",brand:"K2",sup:"보광캡",cat:"용품",ret:true,qty:1000,type:"수량오류"},{d:"03/06",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:true,qty:900,type:"QC불량"},{d:"03/06",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:true,qty:1991,type:"QC불량"},{d:"03/06",brand:"NORDISK",sup:"비하임",cat:"의류",ret:true,qty:242,type:"생산지연"},{d:"03/09",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:1,type:"QC불량"},{d:"03/09",brand:"K2",sup:"아이보리",cat:"의류",ret:false,qty:79,type:"미입고"},{d:"03/09",brand:"K2",sup:"보광캡",cat:"용품",ret:true,qty:2,type:"RFID"},{d:"03/09",brand:"K2",sup:"거림씨앤에프",cat:"의류",ret:true,qty:7,type:"사이즈교차"},{d:"03/09",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:1,type:"QC불량"},{d:"03/09",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:272,type:"박스바코드"},{d:"03/09",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:840,type:"패킹오류"},{d:"03/09",brand:"EIDER",sup:"JIE JIE",cat:"신발",ret:true,qty:5,type:"QC불량"},{d:"03/09",brand:"DYNAFIT",sup:"삼덕통상",cat:"신발",ret:true,qty:289,type:"박스바코드"},{d:"03/10",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:7,type:"QC불량"},{d:"03/10",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:1206,type:"QC불량"},{d:"03/10",brand:"K2",sup:"보광캡",cat:"용품",ret:true,qty:7,type:"RFID"},{d:"03/10",brand:"EIDER",sup:"더 코어",cat:"용품",ret:true,qty:910,type:"생산지연"},{d:"03/10",brand:"DYNAFIT",sup:"SWI이노베이션",cat:"의류",ret:true,qty:2250,type:"예약오류"},{d:"03/10",brand:"WIDE ANGLE",sup:"인티모",cat:"의류",ret:true,qty:3,type:"RFID"},{d:"03/11",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:151,type:"QC불량"},{d:"03/11",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:8,type:"패킹오류"},{d:"03/11",brand:"DYNAFIT",sup:"삼덕통상",cat:"신발",ret:true,qty:152,type:"박스바코드"},{d:"03/12",brand:"K2",sup:"거림씨앤에프",cat:"의류",ret:true,qty:1,type:"RFID"},{d:"03/12",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:true,qty:93,type:"QC불량"},{d:"03/12",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:true,qty:390,type:"QC불량"},{d:"03/12",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:true,qty:42,type:"RFID"},{d:"03/12",brand:"EIDER",sup:"더 코어",cat:"용품",ret:true,qty:680,type:"미입고"},{d:"03/12",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:true,qty:50,type:"미입고"},{d:"03/13",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:6,type:"QC불량"},{d:"03/13",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:928,type:"QC불량"},{d:"03/13",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:8,type:"사이즈교차"},{d:"03/13",brand:"K2",sup:"케이씨인터내셔널",cat:"신발",ret:true,qty:8,type:"QC불량"},{d:"03/13",brand:"K2",sup:"아이케이지",cat:"의류",ret:false,qty:33,type:"미입고"},{d:"03/13",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:270,type:"패킹오류"},{d:"03/13",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:50,type:"패킹오류"},{d:"03/13",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:120,type:"예약오류"},{d:"03/13",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:72,type:"예약오류"},{d:"03/13",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:162,type:"예약오류"},{d:"03/13",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:3,type:"RFID"},{d:"03/13",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:3,type:"QC불량"},{d:"03/13",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:8,type:"박스바코드"},{d:"03/13",brand:"EIDER",sup:"SWI이노베이션",cat:"의류",ret:true,qty:50,type:"사이즈교차"},{d:"03/13",brand:"EIDER",sup:"SWI이노베이션",cat:"의류",ret:true,qty:8,type:"RFID"},{d:"03/13",brand:"EIDER",sup:"더 코어",cat:"용품",ret:false,qty:1520,type:"미입고"},{d:"03/13",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:false,qty:195,type:"생산지연"},{d:"03/13",brand:"WIDE ANGLE",sup:"메이븐에프씨",cat:"의류",ret:false,qty:900,type:"생산지연"},{d:"03/13",brand:"WIDE ANGLE",sup:"태화에프앤티",cat:"의류",ret:true,qty:40,type:"RFID"},{d:"03/16",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:30,type:"QC불량"},{d:"03/16",brand:"K2",sup:"아이보리",cat:"의류",ret:false,qty:48,type:"예약오류"},{d:"03/16",brand:"K2",sup:"보광캡",cat:"용품",ret:true,qty:1,type:"RFID"},{d:"03/16",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:408,type:"박스바코드"},{d:"03/16",brand:"EIDER",sup:"더 코어",cat:"용품",ret:false,qty:680,type:"미입고"},{d:"03/16",brand:"DYNAFIT",sup:"삼덕통상",cat:"신발",ret:true,qty:57,type:"박스바코드"},{d:"03/16",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:false,qty:31,type:"예약오류"},{d:"03/16",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:50,type:"예약오류"},{d:"03/16",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:60,type:"예약오류"},{d:"03/16",brand:"NORDISK",sup:"아이보리",cat:"의류",ret:false,qty:62,type:"예약오류"},{d:"03/16",brand:"NORDISK",sup:"알피티트레이딩",cat:"의류",ret:false,qty:2,type:"예약오류"},{d:"03/16",brand:"NORDISK",sup:"알피티트레이딩",cat:"의류",ret:true,qty:3,type:"RFID"},{d:"03/17",brand:"WIDE ANGLE",sup:"메이븐에프씨",cat:"의류",ret:true,qty:10,type:"사이즈교차"},{d:"03/17",brand:"NORDISK",sup:"레오캡",cat:"용품",ret:true,qty:100,type:"패킹오류"},{d:"03/17",brand:"NORDISK",sup:"레오캡",cat:"용품",ret:true,qty:1,type:"RFID"},{d:"03/18",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:true,qty:5,type:"QC불량"},{d:"03/18",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:true,qty:450,type:"예약오류"},{d:"03/18",brand:"EIDER",sup:"더 코어",cat:"용품",ret:false,qty:971,type:"통관지연"},{d:"03/18",brand:"EIDER",sup:"아이케이지",cat:"의류",ret:false,qty:1,type:"사이즈교차"},{d:"03/18",brand:"DYNAFIT",sup:"삼덕통상",cat:"신발",ret:false,qty:1,type:"미입고"},{d:"03/18",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:true,qty:5,type:"RFID"},{d:"03/18",brand:"DYNAFIT",sup:"레드트레인",cat:"신발",ret:true,qty:12,type:"QC불량"},{d:"03/18",brand:"DYNAFIT",sup:"레드트레인",cat:"신발",ret:true,qty:16,type:"예약오류"},{d:"03/18",brand:"DYNAFIT",sup:"레드트레인",cat:"신발",ret:true,qty:24,type:"사이즈교차"},{d:"03/18",brand:"DYNAFIT",sup:"월드어패럴",cat:"의류",ret:false,qty:1,type:"미입고"},{d:"03/19",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:3,type:"QC불량"},{d:"03/19",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:false,qty:17,type:"미입고"},{d:"03/19",brand:"EIDER",sup:"더 코어",cat:"용품",ret:true,qty:13,type:"생산지연"},{d:"03/19",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:1,type:"미입고"},{d:"03/19",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:true,qty:8,type:"예약오류"},{d:"03/20",brand:"K2",sup:"바라크",cat:"신발",ret:true,qty:4,type:"QC불량"},{d:"03/20",brand:"EIDER",sup:"아이케이지",cat:"의류",ret:true,qty:810,type:"패킹오류"},{d:"03/23",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:100,type:"사이즈교차"},{d:"03/23",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:2,type:"RFID"},{d:"03/23",brand:"DYNAFIT",sup:"디오원",cat:"의류",ret:true,qty:10,type:"RFID"},{d:"03/23",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:696,type:"통관지연"},{d:"03/24",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:1850,type:"QC불량"},{d:"03/24",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:24,type:"사이즈교차"},{d:"03/24",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:176,type:"박스바코드"},{d:"03/24",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:76,type:"미입고"},{d:"03/24",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:true,qty:63,type:"수량오류"},{d:"03/24",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:true,qty:110,type:"패킹오류"},{d:"03/24",brand:"NORDISK",sup:"비하임",cat:"의류",ret:false,qty:657,type:"통관지연"},{d:"03/25",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:6,type:"QC불량"},{d:"03/25",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:true,qty:4,type:"RFID"},{d:"03/25",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:337,type:"박스바코드"},{d:"03/25",brand:"WIDE ANGLE",sup:"메이븐에프씨",cat:"의류",ret:true,qty:1,type:"RFID"},{d:"03/25",brand:"WIDE ANGLE",sup:"H&Y상사",cat:"신발",ret:true,qty:2,type:"QC불량"},{d:"03/25",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:17,type:"미입고"},{d:"03/26",brand:"K2",sup:"보광캡",cat:"용품",ret:false,qty:81,type:"수량오류"},{d:"03/26",brand:"K2",sup:"거림씨앤에프",cat:"의류",ret:false,qty:2000,type:"생산지연"},{d:"03/26",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:false,qty:2306,type:"생산지연"},{d:"03/26",brand:"DYNAFIT",sup:"거림씨앤에프",cat:"의류",ret:true,qty:440,type:"사이즈교차"},{d:"03/26",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:true,qty:1,type:"RFID"},{d:"03/26",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:false,qty:1,type:"수량오류"},{d:"03/27",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:7,type:"QC불량"},{d:"03/27",brand:"K2",sup:"거림씨앤에프",cat:"의류",ret:false,qty:333,type:"수량오류"},{d:"03/27",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:true,qty:600,type:"패킹오류"},{d:"03/27",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:false,qty:19,type:"수량오류"},{d:"03/27",brand:"DYNAFIT",sup:"아이보리",cat:"의류",ret:false,qty:63,type:"미입고"},{d:"03/27",brand:"DYNAFIT",sup:"코아플러스",cat:"용품",ret:true,qty:80,type:"RFID"},{d:"03/27",brand:"DYNAFIT",sup:"레드트레인",cat:"신발",ret:true,qty:2,type:"QC불량"},{d:"03/30",brand:"K2",sup:"거림씨앤에프",cat:"의류",ret:false,qty:374,type:"예약오류"},{d:"03/30",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:false,qty:85,type:"예약오류"},{d:"03/30",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:4,type:"RFID"},{d:"03/30",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:false,qty:321,type:"미입고"},{d:"03/30",brand:"EIDER",sup:"바라크",cat:"신발",ret:true,qty:300,type:"패킹오류"},{d:"03/30",brand:"EIDER",sup:"바라크",cat:"신발",ret:true,qty:64,type:"예약오류"},{d:"03/30",brand:"DYNAFIT",sup:"아이보리",cat:"의류",ret:false,qty:3310,type:"미입고"},{d:"03/30",brand:"DYNAFIT",sup:"거림씨앤에프",cat:"의류",ret:false,qty:98,type:"예약오류"},{d:"03/30",brand:"DYNAFIT",sup:"세일통영",cat:"신발",ret:true,qty:15,type:"QC불량"},{d:"03/30",brand:"DYNAFIT",sup:"디오원",cat:"의류",ret:false,qty:162,type:"예약오류"},{d:"03/31",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:2,type:"QC불량"},{d:"03/31",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:true,qty:96,type:"RFID"},{d:"03/31",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:false,qty:166,type:"미입고"},{d:"03/31",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:344,type:"박스바코드"},{d:"03/31",brand:"EIDER",sup:"레드트레인",cat:"신발",ret:true,qty:1,type:"QC불량"},{d:"03/31",brand:"DYNAFIT",sup:"오디에스컴퍼니",cat:"의류",ret:false,qty:15,type:"수량오류"},{d:"03/31",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:119,type:"미입고"},{d:"03/31",brand:"DYNAFIT",sup:"레드트레인",cat:"신발",ret:true,qty:1,type:"QC불량"}];
+
+let DATES=[...new Set(RAW.map(r=>r.d))].sort(),DSET=new Set(DATES);
+let BRANDS=[...new Set(RAW.map(r=>r.brand))].sort();
+const BC={K2:"#4a90a4",EIDER:"#c0625a",DYNAFIT:"#d4915e","WIDE ANGLE":"#6a9f7e",NORDISK:"#8b7ec7",PIRETTI:"#8a9b68"};
+const TYPES=["QC불량","미입고","예약오류","패킹오류","박스바코드","RFID","사이즈교차","통관지연","생산지연","수량오류","전산오류"];
+const TC={QC불량:"#e8928d",미입고:"#95a5a6",예약오류:"#e8c18d",패킹오류:"#a8a0d6",박스바코드:"#7db8d4",RFID:"#7db5b5",사이즈교차:"#b5a8d6",통관지연:"#d4c47d",생산지연:"#b5c4c4",수량오류:"#d4a07d",전산오류:"#7dc4b0"};
+const CN={kpi:"핵심 지표 요약",trend:"일별 이슈 추이",brand:"브랜드별 이슈 수량",issue:"이슈 유형별 현황",supplier:"주의 업체 TOP 8",repeat:"반복 이슈 업체",detail:"상세 이슈 목록"};
+const TCD={QC불량:"#b04540",미입고:"#4a5a5e",예약오류:"#a07838",패킹오류:"#5a48a0",박스바코드:"#2a6e90",RFID:"#2a7070",사이즈교차:"#6a50a8",통관지연:"#8a7820",생산지연:"#606e6e",수량오류:"#904e20",전산오류:"#2a7a60"};
+const fmt=n=>n.toLocaleString();
+let selD=new Set(DATES),selB=new Set(),editing=false,dF={sup:"전체",brand:"전체",type:"전체"};
+let dFDates=new Set();
+let detCalO=false;
+let hidden=new Set();
+let etx=JSON.parse(localStorage.getItem("_t")||"{}");
+let loadedFileName="";
+function gT(k){return etx[k]||{repeat:"동일 이슈 3회 이상 — 시정 요구 대상"}[k]||""}
+function sT(k,v){etx[k]=v.trim();localStorage.setItem("_t",JSON.stringify(etx))}
+function getF(){let d=RAW;if(selD.size<DATES.length)d=d.filter(r=>selD.has(r.d));if(selB.size>0)d=d.filter(r=>selB.has(r.brand));return d}
+
+// ═══ EXCEL PARSING ═══
+function classifyIssue(detail){
+  if(!detail) return "기타";
+  const d=detail.toLowerCase();
+  if(d.includes("qc")||d.includes("검수")) return "QC불량";
+  if(d.includes("rfid")||(d.includes("칩")&&(d.includes("불량")||d.includes("인식")))) return "RFID";
+  if(d.includes("박스")&&(d.includes("바코드")||d.includes("인식"))) return "박스바코드";
+  if(d.includes("사이즈")||d.includes("교차")&&!d.includes("통관")) return "사이즈교차";
+  if(d.includes("예약")&&(d.includes("수량")||d.includes("상이")||d.includes("오등록")||d.includes("오류")||d.includes("등록"))) return "예약오류";
+  if(d.includes("미입고")||d.includes("미선적")) return "미입고";
+  if(d.includes("통관")) return "통관지연";
+  if(d.includes("생산")||(d.includes("지연")&&!d.includes("통관"))) return "생산지연";
+  if(d.includes("수량")&&(d.includes("초과")||d.includes("오등록"))) return "수량오류";
+  if(d.includes("출고")||d.includes("패킹")||d.includes("아소트")) return "패킹오류";
+  if(d.includes("전산")) return "전산오류";
+  return "기타";
+}
+
+function parseExcel(workbook){
+  const newData=[];
+  workbook.SheetNames.forEach(sheetName=>{
+    const ws=workbook.Sheets[sheetName];
+    const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
+    // Find header row (look for "날짜" or "브랜드")
+    let headerRow=-1;
+    for(let i=0;i<Math.min(rows.length,20);i++){
+      const r=rows[i].map(c=>String(c).trim());
+      if(r.some(c=>c==="날짜")&&r.some(c=>c==="브랜드")){headerRow=i;break}
+    }
+    if(headerRow<0) return;
+    const hdr=rows[headerRow].map(c=>String(c).trim());
+    const ci={};
+    hdr.forEach((h,i)=>{
+      if(h==="날짜") ci.date=i;
+      else if(h==="브랜드") ci.brand=i;
+      else if(h.includes("생산")) ci.sup=i;
+      else if(h==="복종") ci.cat=i;
+      else if(h==="품번") ci.product=i;
+      else if(h.includes("반송")) ci.ret=i;
+      else if(h==="수량"||h==="수량▼"||h.includes("수량")) ci.qty=i;
+      else if(h.includes("상세")||h.includes("내용")) ci.detail=i;
+    });
+    if(ci.date===undefined||ci.brand===undefined) return;
+    for(let i=headerRow+1;i<rows.length;i++){
+      const r=rows[i];
+      let dateVal=r[ci.date];
+      let brand=String(r[ci.brand]||"").trim();
+      if(!dateVal||!brand) continue;
+      // Parse date
+      let dStr="";
+      if(dateVal instanceof Date||(typeof dateVal==="number")){
+        const dt=typeof dateVal==="number"?new Date((dateVal-25569)*86400000):dateVal;
+        const mm=String(dt.getMonth()+1).padStart(2,"0");
+        const dd=String(dt.getDate()).padStart(2,"0");
+        dStr=mm+"/"+dd;
+      } else {
+        const s=String(dateVal);
+        const m=s.match(/(\d{1,2})[\/\-](\d{1,2})/);
+        if(m) dStr=m[1].padStart(2,"0")+"/"+m[2].padStart(2,"0");
+        else continue;
+      }
+      brand=brand.replace("WIDEºANGLE","WIDE ANGLE").replace("WIDEANGLE","WIDE ANGLE");
+      const sup=String(r[ci.sup]||"").trim();
+      const cat=String(r[ci.cat]||"").trim();
+      const retStr=String(r[ci.ret]||"").trim();
+      const isRet=retStr==="O"||retStr==="●"||retStr==="o";
+      const qty=parseInt(r[ci.qty])||0;
+      const detail=String(r[ci.detail]||"").trim();
+      const type=classifyIssue(detail);
+      if(qty>0) newData.push({d:dStr,brand,sup,cat,ret:isRet,qty,type});
+    }
+  });
+  return newData;
+}
+
+function loadData(data,fileName){
+  RAW=data;
+  DATES=[...new Set(RAW.map(r=>r.d))].sort();
+  DSET=new Set(DATES);
+  BRANDS=[...new Set(RAW.map(r=>r.brand))].sort();
+  selD=new Set(DATES);
+  selB.clear();
+  dFDates.clear();
+  dF={sup:"전체",brand:"전체",type:"전체"};
+  loadedFileName=fileName;
+  // Update title
+  const monthMatch=fileName.match(/(\d{4})\D*(\d{1,2})월/);
+  if(monthMatch) {
+    document.getElementById("topDate").textContent=monthMatch[1]+"년 "+monthMatch[2]+"월";
+    document.querySelector(".topbar-sub").textContent="| "+monthMatch[2]+"월 대시보드";
+  } else {
+    const mMatch=fileName.match(/(\d{1,2})월/);
+    if(mMatch) document.querySelector(".topbar-sub").textContent="| "+mMatch[1]+"월 대시보드";
+  }
+  // Update UI
+  document.getElementById("uploadInfo").innerHTML=`<span class="upload-file">${fileName}</span> 로드 완료 (${RAW.length}건)`;
+  uCL();initB();fillCards();
+}
+
+function handleFile(file){
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(e.target.result,{type:"array",cellDates:true});
+      const data=parseExcel(wb);
+      if(data.length===0){alert("데이터를 찾을 수 없습니다.\n엑셀 파일에 '날짜', '브랜드' 헤더가 있는지 확인해 주세요.");return}
+      loadData(data,file.name);
+    }catch(err){alert("파일 읽기 오류: "+err.message)}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ═══ DRAG & DROP ═══
+const dropOverlay=document.getElementById("dropOverlay");
+let dragCounter=0;
+document.addEventListener("dragenter",e=>{e.preventDefault();dragCounter++;dropOverlay.classList.add("show")});
+document.addEventListener("dragleave",e=>{e.preventDefault();dragCounter--;if(dragCounter<=0){dragCounter=0;dropOverlay.classList.remove("show")}});
+document.addEventListener("dragover",e=>{e.preventDefault()});
+document.addEventListener("drop",e=>{
+  e.preventDefault();dragCounter=0;dropOverlay.classList.remove("show");
+  const file=e.dataTransfer.files[0];
+  if(file&&(file.name.endsWith(".xlsx")||file.name.endsWith(".xls"))) handleFile(file);
+  else if(file) alert("엑셀 파일(.xlsx, .xls)만 지원합니다.");
+});
+
+// Default layout: {id, x, y, w, h}
+const DEF_LAYOUT=[
+  {id:"kpi",x:0,y:0,w:12,h:2},
+  {id:"trend",x:0,y:2,w:12,h:3},
+  {id:"brand",x:0,y:5,w:6,h:4},
+  {id:"issue",x:6,y:5,w:6,h:4},
+  {id:"supplier",x:0,y:9,w:6,h:5},
+  {id:"repeat",x:6,y:9,w:6,h:5},
+  {id:"detail",x:0,y:14,w:12,h:6},
+];
+
+let grid=null;
+
+function initGrid(){
+  const saved=JSON.parse(localStorage.getItem("_gl")||"null");
+  const layout=saved||DEF_LAYOUT;
+  hidden=new Set(JSON.parse(localStorage.getItem("_gh")||"[]"));
+
+  grid=GridStack.init({
+    column:12,cellHeight:40,margin:6,
+    disableDrag:!editing,disableResize:!editing,
+    float:true,animate:false
+  },"#gs");
+
+  layout.filter(it=>!hidden.has(it.id)).forEach(it=>{
+    grid.addWidget({x:it.x,y:it.y,w:it.w,h:it.h,id:it.id,content:`<div class="gs-item-content" id="card-${it.id}"><button class="card-x" onclick="hideCard('${it.id}')">✕</button></div>`});
+  });
+
+  grid.on("change",saveGrid);
+  fillCards();
+}
+
+function saveGrid(){
+  const items=grid.getGridItems().map(el=>{const n=el.gridstackNode;return{id:n.id,x:n.x,y:n.y,w:n.w,h:n.h}});
+  localStorage.setItem("_gl",JSON.stringify(items));
+  localStorage.setItem("_gh",JSON.stringify([...hidden]));
+}
+
+function hideCard(id){
+  const el=grid.getGridItems().find(e=>e.gridstackNode.id===id);
+  if(el)grid.removeWidget(el);
+  hidden.add(id);saveGrid();renderHidden();
+}
+function showCard(id){
+  hidden.delete(id);
+  const def=DEF_LAYOUT.find(d=>d.id===id)||{x:0,y:0,w:6,h:4};
+  grid.addWidget({x:def.x,y:100,w:def.w,h:def.h,id,content:`<div class="gs-item-content" id="card-${id}"><button class="card-x" onclick="hideCard('${id}')">✕</button></div>`});
+  saveGrid();renderHidden();fillCards();
+}
+function renderHidden(){
+  const bar=document.getElementById("hiddenBar");
+  if(!hidden.size||!editing){bar.innerHTML="";return}
+  bar.innerHTML=`<div class="hidden-bar"><span>숨긴 카드:</span>${[...hidden].map(id=>`<button onclick="showCard('${id}')">+ ${CN[id]||id}</button>`).join("")}</div>`;
+}
+
+function resetLayout(){if(!confirm("배치를 초기화하시겠습니까?"))return;localStorage.removeItem("_gl");localStorage.removeItem("_gh");location.reload()}
+
+const EDIT_PW="2211001"; // ← 여기서 비밀번호 변경
+
+function toggleEdit(){
+  if(!editing){
+    const pw=prompt("편집 모드 비밀번호를 입력하세요:");
+    if(pw!==EDIT_PW){if(pw!==null)alert("비밀번호가 틀렸습니다.");return}
+  }
+  editing=!editing;
+  document.body.classList.toggle("editing",editing);
+  document.getElementById("editBtn").classList.toggle("on",editing);
+  document.getElementById("editBtn").textContent=editing?"편집 모드 ON":"편집 모드";
+  document.getElementById("resetBtn").style.display=editing?"inline":"none";
+  grid.enableMove(editing);grid.enableResize(editing);renderHidden();fillCards();
+}
+
+// ═══ Calendar ═══
+let calO=false;
+let calViewY=2026, calViewM=2; // 0-indexed month (2=March)
+let tempSelD=new Set(DATES); // temporary selection before apply
+
+function toggleCal(){
+  if(calO) return; // already open, don't close
+  calO=true;
+  tempSelD=new Set(selD);
+  document.getElementById("calPopup").classList.add("open");
+  renderCal();
+}
+function closeCal(){calO=false;document.getElementById("calPopup").classList.remove("open")}
+
+function calPrevM(){calViewM--;if(calViewM<0){calViewM=11;calViewY--}renderCal()}
+function calNextM(){calViewM++;if(calViewM>11){calViewM=0;calViewY++}renderCal()}
+function calPrevY(){calViewY--;renderCal()}
+function calNextY(){calViewY++;renderCal()}
+
+function renderCal(){
+  const year=calViewY, month=calViewM;
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const startDow=new Date(year,month,1).getDay();
+  const dw=["일","월","화","수","목","금","토"];
+  const monthNames=["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
+
+  let h=`<div class="cal-nav">`;
+  h+=`<button class="cal-nav-btn" onclick="calPrevY()" title="이전 년도">«</button>`;
+  h+=`<button class="cal-nav-btn" onclick="calPrevM()" title="이전 월">‹</button>`;
+  h+=`<div class="cal-nav-label">${year}년 ${monthNames[month]}</div>`;
+  h+=`<button class="cal-nav-btn" onclick="calNextM()" title="다음 월">›</button>`;
+  h+=`<button class="cal-nav-btn" onclick="calNextY()" title="다음 년도">»</button>`;
+  h+=`</div>`;
+
+  h+=`<div class="cal-grid">`;
+  dw.forEach((d,i)=>h+=`<div class="cal-dow" style="${i===0?'color:#c0625a':i===6?'color:#4a90a4':''}">${d}</div>`);
+  for(let i=0;i<startDow;i++) h+=`<div class="cal-day" style="visibility:hidden"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const mm=String(month+1).padStart(2,"0");
+    const dd=String(d).padStart(2,"0");
+    const ds=`${mm}/${dd}`;
+    const fullKey=`${year}-${ds}`;
+    const has=DSET.has(ds) && year===2026 && month===2; // current data is March 2026 only
+    const sel=tempSelD.has(ds) && year===2026 && month===2;
+    const dow=new Date(year,month,d).getDay();
+    const cls=["cal-day"];
+    if(sel) cls.push("selected");
+    if(has) cls.push("has-data");
+    const sty=sel?"":dow===0?"color:#c0625a":dow===6?"color:#4a90a4":"";
+    h+=`<div class="${cls.join(" ")}" style="${sty}" onclick="tDTemp('${ds}',${year},${month})">${d}</div>`;
+  }
+  h+=`</div>`;
+
+  // Selected info
+  const selInfo=fmtDateRange(tempSelD);
+  h+=`<div class="cal-actions">`;
+  h+=`<button class="cbtn p" onclick="tempAllDays()">전체</button>`;
+  h+=`<button class="cbtn" onclick="tempNoDays()">해제</button>`;
+  h+=`<span class="cal-sel-info">${selInfo}</span>`;
+  h+=`<button class="cbtn" onclick="closeCal()">취소</button>`;
+  h+=`<button class="cal-apply" onclick="applyCal()">조회</button>`;
+  h+=`</div>`;
+
+  document.getElementById("calPopup").innerHTML=h;
+}
+
+function tDTemp(ds,y,m){
+  // Only toggle dates that exist in current data (March 2026)
+  if(y===2026 && m===2 && DSET.has(ds)){
+    if(tempSelD.has(ds)) tempSelD.delete(ds); else tempSelD.add(ds);
+    renderCal();
+  }
+}
+function tempAllDays(){tempSelD=new Set(DATES);renderCal()}
+function tempNoDays(){tempSelD.clear();renderCal()}
+function applyCal(){
+  selD=new Set(tempSelD);
+  uCL();closeCal();fillCards();
+}
+function fmtDateRange(dateSet){
+  if(dateSet.size===0) return "선택 없음";
+  if(dateSet.size===DATES.length) return "전체";
+  const sorted=[...dateSet].sort();
+  const first=sorted[0], last=sorted[sorted.length-1];
+  const f1=parseInt(first.split("/")[0])+"/"+parseInt(first.split("/")[1]);
+  const l1=parseInt(last.split("/")[0])+"/"+parseInt(last.split("/")[1]);
+  if(sorted.length===1) return f1;
+  // Check if consecutive
+  const days=sorted.map(d=>parseInt(d.split("/")[1]));
+  const isConsec=days.every((v,i)=>i===0||v===days[i-1]+1);
+  if(isConsec) return f1+"~"+l1;
+  return f1+"~"+l1+" ("+sorted.length+"일)";
+}
+function uCL(){document.getElementById("calLabel").textContent=fmtDateRange(selD)}
+
+// ═══ Brands ═══
+function initB(){const autoC=["#4a90a4","#c0625a","#d4915e","#6a9f7e","#8b7ec7","#8a9b68","#c47d7d","#7d9ec4","#a4a04a","#7dc4b0"];document.getElementById("bfDiv").innerHTML=BRANDS.map((b,i)=>{const c=BC[b]||autoC[i%autoC.length];return`<button class="bp" data-b="${b}" onclick="tB('${b}')"><span class="dot" style="background:${c}"></span>${b}</button>`}).join("")}
+function tB(b){if(selB.has(b))selB.delete(b);else selB.add(b);uBU();fillCards()}
+function clrBr(){selB.clear();uBU();fillCards()}
+function uBU(){document.querySelectorAll(".bp[data-b]").forEach(el=>{const b=el.dataset.b,a=selB.has(b);el.classList.toggle("active",a);el.style.borderColor=a?BC[b]:"#ddd9d3";el.style.background=a?BC[b]+"15":"#fff";el.style.color=a?BC[b]:"#6b6b6b";el.style.fontWeight=a?"600":"400"});document.getElementById("bReset").style.display=selB.size?"inline":"none"}
+
+// ═══ Capture ═══
+async function doCapture(){const b=document.getElementById("capBtn");b.disabled=true;b.textContent="캡처 중...";closeCal();await new Promise(r=>setTimeout(r,300));try{const c=await html2canvas(document.getElementById("captureArea"),{scale:2,useCORS:true,backgroundColor:"#eceae5"});const a=document.createElement("a");a.download="입고특이사항_대시보드.png";a.href=c.toDataURL("image/png");a.click()}catch(e){alert(e)}b.disabled=false;b.innerHTML='<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>캡처'}
+
+// ═══ Renderers ═══
+function rKPI(d){const t=d.reduce((s,r)=>s+r.qty,0),ret=d.filter(r=>r.ret).reduce((s,r)=>s+r.qty,0),sups=new Set(d.map(r=>r.sup)).size;return`<div class="ct">${CN.kpi}</div><div class="kpi-grid">${[{l:"총 건수",v:d.length+"건",c:"#4a6fa5"},{l:"총 이슈 수량",v:fmt(t),c:"#2c2c2c"},{l:"반송 수량",v:fmt(ret),c:"#d4915e",s:t?(ret/t*100).toFixed(0)+"%":""},{l:"미입고/취소",v:fmt(t-ret),c:"#b85450",s:t?((t-ret)/t*100).toFixed(0)+"%":""},{l:"이슈 업체",v:sups+"개",c:"#5a8f6e"}].map(k=>`<div class="kpi-box"><div class="kpi-label">${k.l}</div><div class="kpi-value" style="color:${k.c}">${k.v}</div>${k.s?`<div class="kpi-sub">${k.s}</div>`:""}</div>`).join("")}</div>`}
+
+function rTrend(d){const byD={};d.forEach(r=>{byD[r.d]=(byD[r.d]||0)+r.qty});const dates=DATES.filter(x=>selD.has(x));const mx=Math.max(...dates.map(x=>byD[x]||0),1);return`<div class="ct">${CN.trend}</div><div class="trend-c">${dates.map(x=>{const v=byD[x]||0;const h=v?Math.max(v/mx*75,2):0;const int=v/mx;const c=int>0.7?"#4a6fa5":int>0.4?"#7ba3c4":"#b8d1e4";return`<div class="trend-col"><div class="trend-val">${v>0?fmt(v):""}</div><div class="trend-bw"><div class="trend-bar" style="height:${h}px;background:${c}"></div></div><div class="trend-date">${parseInt(x.split("/")[1])}</div></div>`}).join("")}</div>`}
+
+function rBrand(d){const t=d.reduce((s,r)=>s+r.qty,0);const allB=[...new Set(d.map(r=>r.brand))];const byB=allB.map(b=>({b,qty:d.filter(r=>r.brand===b).reduce((s,r)=>s+r.qty,0)})).sort((a,c)=>c.qty-a.qty);const mx=Math.max(...byB.map(x=>x.qty),1);const autoC=["#4a90a4","#c0625a","#d4915e","#6a9f7e","#8b7ec7","#8a9b68","#c47d7d","#7d9ec4","#a4a04a","#7dc4b0"];return`<div class="ct">${CN.brand}</div>`+byB.map((x,i)=>{const c=BC[x.b]||autoC[i%autoC.length];return`<div class="br"><div class="bl"><span class="dot" style="background:${c};margin-right:4px"></span>${x.b}</div><div class="bt"><div class="bf" style="width:${x.qty/mx*100}%;background:${c}"></div></div><div class="bv">${fmt(x.qty)}</div><div class="bpc">${t?(x.qty/t*100).toFixed(0):0}%</div></div>`}).join("")}
+
+function rIssue(d){const t=d.reduce((s,r)=>s+r.qty,0);const byT=TYPES.map(tp=>({tp,qty:d.filter(r=>r.type===tp).reduce((s,r)=>s+r.qty,0)})).filter(x=>x.qty>0).sort((a,c)=>c.qty-a.qty);const mx=Math.max(...byT.map(x=>x.qty),1);return`<div class="ct">${CN.issue}</div>`+byT.map(x=>`<div class="br"><div class="bl">${x.tp}</div><div class="bt"><div class="bf" style="width:${x.qty/mx*100}%;background:${TC[x.tp]}"></div></div><div class="bv">${fmt(x.qty)}</div><div class="bpc">${t?(x.qty/t*100).toFixed(0):0}%</div></div>`).join("")}
+
+function rSupplier(d){const t=d.reduce((s,r)=>s+r.qty,0);const m={};d.forEach(r=>{if(!m[r.sup])m[r.sup]={s:r.sup,q:0,c:0,br:new Set(),tp:{}};m[r.sup].q+=r.qty;m[r.sup].c++;m[r.sup].br.add(r.brand);m[r.sup].tp[r.type]=(m[r.sup].tp[r.type]||0)+r.qty});const ls=Object.values(m).sort((a,b)=>b.q-a.q).slice(0,8);const rc=["rk1","rk1","rk2","rk3"];let h=`<div class="ct">${CN.supplier}</div><table class="dt"><thead><tr><th></th><th>업체명</th><th class="r">건</th><th class="r">수량</th><th class="c">브랜드</th><th>이슈</th></tr></thead><tbody>`;ls.forEach((s,i)=>{const tp=Object.entries(s.tp).sort((a,b)=>b[1]-a[1])[0];h+=`<tr><td><span class="rk ${rc[i]||"rkn"}">${i+1}</span></td><td style="font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.s}</td><td class="r">${s.c}</td><td class="r" style="font-weight:700">${fmt(s.q)}</td><td class="c" style="font-size:10px">${[...s.br].slice(0,2).join(", ")}</td><td><span class="tg" style="background:${TC[tp[0]]}20;color:${TCD[tp[0]]||TC[tp[0]]};font-weight:600">${tp[0]}</span></td></tr>`});return h+"</tbody></table>"}
+
+function rRepeat(d){const m={};d.forEach(r=>{const k=r.sup+"|||"+r.type;if(!m[k])m[k]={sup:r.sup,type:r.type,cnt:0,qty:0,br:new Set(),ds:new Set()};m[k].cnt++;m[k].qty+=r.qty;m[k].br.add(r.brand);m[k].ds.add(r.d)});const reps=Object.values(m).filter(x=>x.cnt>=3).sort((a,b)=>b.cnt-a.cnt);const sub=gT("repeat");const ed=editing?` contenteditable="true" onblur="sT('repeat',this.textContent)"`:"";let h=`<div class="ct">${CN.repeat} <span class="editable-sub"${ed}>${sub}</span></div>`;if(!reps.length)return h+`<div style="color:#aaa;font-size:12px;padding:12px;text-align:center">해당 조건에 반복 이슈 없음</div>`;return h+reps.slice(0,6).map(x=>`<div class="rr"><div class="rc">${x.cnt}회</div><div class="ri"><div class="rn">${x.sup} <span class="at">${x.type}</span></div><div class="rd">${[...x.br].join(", ")} · ${x.ds.size}일간</div></div><div class="rq">${fmt(x.qty)}</div></div>`).join("")}
+
+let detCalVY=2026,detCalVM=2;
+let tempDFDates=new Set();
+
+function tDCal(ds){if(tempDFDates.has(ds))tempDFDates.delete(ds);else tempDFDates.add(ds);fillCards()}
+function aDCal(){tempDFDates.clear();fillCards()}
+function applyDetCal(){dFDates=new Set(tempDFDates);detCalO=false;fillCards()}
+function tgDetCal(){if(detCalO)return;detCalO=true;tempDFDates=new Set(dFDates);fillCards()}
+function detCalPM(){detCalVM--;if(detCalVM<0){detCalVM=11;detCalVY--}fillCards()}
+function detCalNM(){detCalVM++;if(detCalVM>11){detCalVM=0;detCalVY++}fillCards()}
+function detCalPY(){detCalVY--;fillCards()}
+function detCalNY(){detCalVY++;fillCards()}
+
+function rDetail(d){const sups=[...new Set(d.map(r=>r.sup))].sort(),brands=[...new Set(d.map(r=>r.brand))].sort(),types=[...new Set(d.map(r=>r.type))].sort(),dates=[...new Set(d.map(r=>r.d))].sort();let fd=d;if(dFDates.size>0)fd=fd.filter(r=>dFDates.has(r.d));if(dF.sup!=="전체")fd=fd.filter(r=>r.sup===dF.sup);if(dF.brand!=="전체")fd=fd.filter(r=>r.brand===dF.brand);if(dF.type!=="전체")fd=fd.filter(r=>r.type===dF.type);const hf=dFDates.size>0||Object.values(dF).some(v=>v!=="전체");
+let h=`<div class="ct">${CN.detail} <span class="sub">${fd.length}건</span></div><div class="df">`;
+const dLabel=dFDates.size===0?"날짜: 전체":("날짜: "+fmtDateRange(dFDates));
+h+=`<div class="dcal-wrap"><button class="dcal-toggle" onclick="tgDetCal()"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${dLabel}</button>`;
+if(detCalO){
+  const mn2=["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
+  const dim2=new Date(detCalVY,detCalVM+1,0).getDate();
+  const sd2=new Date(detCalVY,detCalVM,1).getDay();
+  const dw2=["일","월","화","수","목","금","토"];
+  const dateSet=new Set(dates);
+  h+=`<div class="dcal-popup open">`;
+  h+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">`;
+  h+=`<button class="cal-nav-btn" style="width:22px;height:22px;font-size:11px" onclick="detCalPY()">«</button>`;
+  h+=`<button class="cal-nav-btn" style="width:22px;height:22px;font-size:11px" onclick="detCalPM()">‹</button>`;
+  h+=`<span style="font-size:11px;font-weight:700;min-width:80px;text-align:center">${detCalVY}년 ${mn2[detCalVM]}</span>`;
+  h+=`<button class="cal-nav-btn" style="width:22px;height:22px;font-size:11px" onclick="detCalNM()">›</button>`;
+  h+=`<button class="cal-nav-btn" style="width:22px;height:22px;font-size:11px" onclick="detCalNY()">»</button>`;
+  h+=`</div><div class="dcal-grid">`;
+  dw2.forEach((x,i)=>h+=`<div class="dcal-dow" style="${i===0?'color:#c0625a':i===6?'color:#4a90a4':''}">${x}</div>`);
+  for(let i=0;i<sd2;i++)h+=`<div class="dcal-day nodata"></div>`;
+  for(let dd=1;dd<=dim2;dd++){
+    const ds2=`${String(detCalVM+1).padStart(2,"0")}/${String(dd).padStart(2,"0")}`;
+    const has2=dateSet.has(ds2)&&detCalVY===2026&&detCalVM===2;
+    const sel2=tempDFDates.has(ds2)&&detCalVY===2026&&detCalVM===2;
+    const cls2=["dcal-day"];if(sel2)cls2.push("sel");if(!has2)cls2.push("nodata");
+    const dow2=new Date(detCalVY,detCalVM,dd).getDay();
+    const sty2=sel2?"":dow2===0?"color:#c0625a":dow2===6?"color:#4a90a4":"";
+    h+=`<div class="${cls2.join(" ")}" style="${sty2}" onclick="tDCal('${ds2}')">${dd}</div>`;
+  }
+  const tCnt=tempDFDates.size;const detInfo=tCnt===0?"전체":fmtDateRange(tempDFDates);
+  h+=`</div><div class="dcal-actions"><button class="cbtn p" style="font-size:9px;padding:3px 8px" onclick="aDCal()">전체</button><span class="cal-sel-info">${detInfo}</span><button class="cbtn" style="font-size:9px;padding:3px 8px" onclick="detCalO=false;fillCards()">취소</button><button class="cal-apply" style="font-size:10px;padding:4px 12px" onclick="applyDetCal()">조회</button></div></div>`;
+}
+h+=`</div>`;
+h+=`<select class="ds" onchange="dF.brand=this.value;fillCards()"><option value="전체">브랜드</option>${brands.map(x=>`<option${dF.brand===x?" selected":""}>${x}</option>`).join("")}</select>`;h+=`<select class="ds" onchange="dF.sup=this.value;fillCards()"><option value="전체">업체</option>${sups.map(x=>`<option value="${x}"${dF.sup===x?" selected":""}>${x}</option>`).join("")}</select>`;h+=`<select class="ds" onchange="dF.type=this.value;fillCards()"><option value="전체">이슈</option>${types.map(x=>`<option${dF.type===x?" selected":""}>${x}</option>`).join("")}</select>`;if(hf)h+=`<button class="bsm" onclick="dF={sup:'전체',brand:'전체',type:'전체'};dFDates.clear();detCalO=false;fillCards()">초기화</button>`;h+=`</div><div style="overflow-y:auto;max-height:calc(100% - 70px);border:1px solid #eee;border-radius:4px"><table class="dt"><thead><tr><th>날짜</th><th>브랜드</th><th>업체</th><th>복종</th><th>구분</th><th class="r">수량</th><th>이슈</th></tr></thead><tbody>`;fd.slice(0,80).forEach((r,i)=>{h+=`<tr style="background:${i%2?"#fdfcfa":""}"><td>${r.d}</td><td><span class="dot" style="background:${BC[r.brand]};margin-right:3px"></span>${r.brand}</td><td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.sup}</td><td>${r.cat}</td><td><span class="tg" style="background:${r.ret?"#e4ecf4":"#f8e8e7"};color:${r.ret?"#3a6090":"#a03838"};font-weight:500">${r.ret?"반송":"미입고"}</span></td><td class="r" style="font-weight:600">${fmt(r.qty)}</td><td><span class="tg" style="background:${TC[r.type]}20;color:${TCD[r.type]||TC[r.type]};font-weight:500">${r.type}</span></td></tr>`});return h+"</tbody></table></div>"}
+
+const REN={kpi:rKPI,trend:rTrend,brand:rBrand,issue:rIssue,supplier:rSupplier,repeat:rRepeat,detail:rDetail};
+
+function fillCards(){
+  const d=getF();
+  document.getElementById("fInfo").textContent=`${d.length}건 · ${fmt(d.reduce((s,r)=>s+r.qty,0))}수량`;
+  Object.keys(REN).forEach(id=>{
+    const el=document.getElementById("card-"+id);
+    if(!el)return;
+    const xBtn=el.querySelector(".card-x");
+    el.innerHTML=(xBtn?xBtn.outerHTML:"")+REN[id](d);
+  });
+}
+
+document.addEventListener("click",e=>{});
+initB();initGrid();
+</script>
+</body>
+</html>
