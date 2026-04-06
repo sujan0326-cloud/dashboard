@@ -50,6 +50,13 @@ body{font-family:'Noto Sans KR','DM Sans',sans-serif;background:#eceae5;color:#2
 .cal-sel-info{font-size:10px;color:#888;margin-left:auto}
 .cal-apply{font-size:11px;padding:5px 16px;border-radius:4px;border:none;background:#4a6fa5;color:#fff;cursor:pointer;font-family:inherit;font-weight:600;transition:background 0.2s}
 .cal-apply:hover{background:#3d5f8f}
+
+/* Month selector */
+.cal-months{display:flex;flex-wrap:wrap;gap:2px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #eee}
+.cal-month{font-size:10px;padding:3px 7px;border-radius:3px;cursor:pointer;color:#888;transition:all 0.12s;font-family:inherit;border:none;background:none}
+.cal-month:hover{background:#e4ecf4;color:#4a6fa5}
+.cal-month.active{background:#4a6fa5;color:#fff;font-weight:600}
+.cal-month.has-data-month{color:#2c2c2c;font-weight:500}
 .cbtn{font-size:10px;padding:4px 10px;border-radius:3px;border:1px solid #ddd;background:#fff;cursor:pointer;font-family:inherit}
 .cbtn.p{background:#4a6fa5;color:#fff;border-color:#4a6fa5}
 .bp{font-size:10px;padding:4px 10px;border-radius:12px;border:1px solid #ddd9d3;background:#fff;color:#6b6b6b;cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:4px;font-family:inherit}
@@ -211,7 +218,7 @@ body.editing .upload-info{display:inline}
 <div class="dashboard" id="captureArea">
   <div id="hiddenBar"></div>
   <div class="grid-stack" id="gs"></div>
-  <div class="footer">엑셀 파일을 화면에 드래그하거나 [엑셀 업로드] 버튼으로 데이터 갱신 · 편집 모드에서 카드 배치/크기 조절 · [캡처] 버튼으로 PNG &nbsp;|&nbsp; v12</div>
+  <div class="footer">엑셀 파일을 화면에 드래그하거나 [엑셀 업로드] 버튼으로 데이터 갱신 · 편집 모드에서 카드 배치/크기 조절 · [캡처] 버튼으로 PNG &nbsp;|&nbsp; v17</div>
 </div>
 
 <script>
@@ -288,16 +295,26 @@ function parseExcel(workbook){
       if(!dateVal||!brand) continue;
       // Parse date
       let dStr="";
-      if(dateVal instanceof Date||(typeof dateVal==="number")){
-        const dt=typeof dateVal==="number"?new Date((dateVal-25569)*86400000):dateVal;
-        const mm=String(dt.getMonth()+1).padStart(2,"0");
-        const dd=String(dt.getDate()).padStart(2,"0");
+      if(typeof dateVal==="number"){
+        // Excel serial number → UTC date
+        const utcMs=(dateVal-25569)*86400000;
+        const dt=new Date(utcMs);
+        const mm=String(dt.getUTCMonth()+1).padStart(2,"0");
+        const dd=String(dt.getUTCDate()).padStart(2,"0");
+        dStr=mm+"/"+dd;
+      } else if(dateVal instanceof Date){
+        const mm=String(dateVal.getUTCMonth()+1).padStart(2,"0");
+        const dd=String(dateVal.getUTCDate()).padStart(2,"0");
         dStr=mm+"/"+dd;
       } else {
         const s=String(dateVal);
-        const m=s.match(/(\d{1,2})[\/\-](\d{1,2})/);
-        if(m) dStr=m[1].padStart(2,"0")+"/"+m[2].padStart(2,"0");
-        else continue;
+        const m4=s.match(/\d{4}[\-\/](\d{1,2})[\-\/](\d{1,2})/);
+        if(m4) dStr=m4[1].padStart(2,"0")+"/"+m4[2].padStart(2,"0");
+        else {
+          const m2=s.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
+          if(m2) dStr=m2[1].padStart(2,"0")+"/"+m2[2].padStart(2,"0");
+          else continue;
+        }
       }
       brand=brand.replace("WIDEºANGLE","WIDE ANGLE").replace("WIDEANGLE","WIDE ANGLE");
       const sup=String(r[ci.sup]||"").trim();
@@ -337,12 +354,16 @@ function loadData(data,fileName){
     const lastDate=DATES[DATES.length-1]; // e.g. "04/03"
     const mm=parseInt(lastDate.split("/")[0]);
     calViewM=mm-1; // 0-indexed
-    calViewY=2026; // default year
+    calViewY=2026;
     detCalVM=mm-1;
     detCalVY=2026;
+    console.log("[대시보드] 로드 완료:", RAW.length+"건,", "날짜:", DATES.join(", "));
   }
+  // Unique months for display
+  const months=[...new Set(DATES.map(d=>parseInt(d.split("/")[0])))].sort((a,b)=>a-b);
+  const monthStr=months.map(m=>m+"월").join(", ");
   // Update UI
-  document.getElementById("uploadInfo").innerHTML=`<span class="upload-file">${fileName}</span> 로드 완료 (${RAW.length}건)`;
+  document.getElementById("uploadInfo").innerHTML=`<span class="upload-file">${fileName}</span> ${RAW.length}건 (${monthStr})`;
   uCL();initB();fillCards();
 }
 
@@ -352,7 +373,7 @@ function handleFile(file){
   const reader=new FileReader();
   reader.onload=function(e){
     try{
-      const wb=XLSX.read(e.target.result,{type:"array",cellDates:true});
+      const wb=XLSX.read(e.target.result,{type:"array"});
       const data=parseExcel(wb);
       if(data.length===0){alert("데이터를 찾을 수 없습니다.\n엑셀 파일에 '날짜', '브랜드' 헤더가 있는지 확인해 주세요.");return}
       loadData(data,file.name);
@@ -487,24 +508,37 @@ function toggleCal(){
 }
 function closeCal(){calO=false;document.getElementById("calPopup").classList.remove("open")}
 
-function calPrevM(){calViewM--;if(calViewM<0){calViewM=11;calViewY--}renderCal()}
-function calNextM(){calViewM++;if(calViewM>11){calViewM=0;calViewY++}renderCal()}
 function calPrevY(){calViewY--;renderCal()}
 function calNextY(){calViewY++;renderCal()}
+
+function calSetM(m){calViewM=m;renderCal()}
 
 function renderCal(){
   const year=calViewY, month=calViewM;
   const daysInMonth=new Date(year,month+1,0).getDate();
   const startDow=new Date(year,month,1).getDay();
   const dw=["일","월","화","수","목","금","토"];
-  const monthNames=["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
+  
+  // Which months have data?
+  const dataMonths=new Set(DATES.map(d=>parseInt(d.split("/")[0])-1));
 
-  let h=`<div class="cal-nav">`;
+  // Year nav + month selector
+  let h=`<div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:6px">`;
   h+=`<button class="cal-nav-btn" onclick="calPrevY()" title="이전 년도">«</button>`;
-  h+=`<button class="cal-nav-btn" onclick="calPrevM()" title="이전 월">‹</button>`;
-  h+=`<div class="cal-nav-label">${year}년 ${monthNames[month]}</div>`;
-  h+=`<button class="cal-nav-btn" onclick="calNextM()" title="다음 월">›</button>`;
+  h+=`<span style="font-size:13px;font-weight:700;min-width:50px;text-align:center">${year}년</span>`;
   h+=`<button class="cal-nav-btn" onclick="calNextY()" title="다음 년도">»</button>`;
+  h+=`</div>`;
+
+  // Month bar (1~12)
+  h+=`<div class="cal-months">`;
+  for(let m=0;m<12;m++){
+    const isActive=m===month;
+    const hasData=dataMonths.has(m);
+    const cls=["cal-month"];
+    if(isActive) cls.push("active");
+    if(hasData&&!isActive) cls.push("has-data-month");
+    h+=`<button class="${cls.join(" ")}" onclick="calSetM(${m})">${m+1}월</button>`;
+  }
   h+=`</div>`;
 
   h+=`<div class="cal-grid">`;
@@ -514,7 +548,6 @@ function renderCal(){
     const mm=String(month+1).padStart(2,"0");
     const dd=String(d).padStart(2,"0");
     const ds=`${mm}/${dd}`;
-    const fullKey=`${year}-${ds}`;
     const has=DSET.has(ds);
     const sel=tempSelD.has(ds);
     const dow=new Date(year,month,d).getDay();
@@ -526,11 +559,8 @@ function renderCal(){
   }
   h+=`</div>`;
 
-  // Selected info
   const selInfo=fmtDateRange(tempSelD);
   h+=`<div class="cal-actions">`;
-  h+=`<button class="cbtn p" onclick="tempAllDays()">전체</button>`;
-  h+=`<button class="cbtn" onclick="tempNoDays()">해제</button>`;
   h+=`<span class="cal-sel-info">${selInfo}</span>`;
   h+=`<button class="cbtn" onclick="closeCal()">취소</button>`;
   h+=`<button class="cal-apply" onclick="applyCal()">조회</button>`;
@@ -586,7 +616,7 @@ function rBrand(d){const t=d.reduce((s,r)=>s+r.qty,0);const allB=[...new Set(d.m
 
 function rIssue(d){const t=d.reduce((s,r)=>s+r.qty,0);const byT=TYPES.map(tp=>({tp,qty:d.filter(r=>r.type===tp).reduce((s,r)=>s+r.qty,0)})).filter(x=>x.qty>0).sort((a,c)=>c.qty-a.qty);const mx=Math.max(...byT.map(x=>x.qty),1);return`<div class="ct">${CN.issue}</div>`+byT.map(x=>`<div class="br"><div class="bl">${x.tp}</div><div class="bt"><div class="bf" style="width:${x.qty/mx*100}%;background:${TC[x.tp]}"></div></div><div class="bv">${fmt(x.qty)}</div><div class="bpc">${t?(x.qty/t*100).toFixed(0):0}%</div></div>`).join("")}
 
-function rSupplier(d){const t=d.reduce((s,r)=>s+r.qty,0);const m={};d.forEach(r=>{if(!m[r.sup])m[r.sup]={s:r.sup,q:0,c:0,br:new Set(),tp:{}};m[r.sup].q+=r.qty;m[r.sup].c++;m[r.sup].br.add(r.brand);m[r.sup].tp[r.type]=(m[r.sup].tp[r.type]||0)+r.qty});const ls=Object.values(m).sort((a,b)=>b.q-a.q).slice(0,8);const rc=["rk1","rk1","rk2","rk3"];let h=`<div class="ct">${CN.supplier}</div><table class="dt"><thead><tr><th></th><th>업체명</th><th class="r">건</th><th class="r">수량</th><th class="c">브랜드</th><th>이슈</th></tr></thead><tbody>`;ls.forEach((s,i)=>{const tp=Object.entries(s.tp).sort((a,b)=>b[1]-a[1])[0];h+=`<tr><td><span class="rk ${rc[i]||"rkn"}">${i+1}</span></td><td style="font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.s}</td><td class="r">${s.c}</td><td class="r" style="font-weight:700">${fmt(s.q)}</td><td class="c" style="font-size:10px">${[...s.br].slice(0,2).join(", ")}</td><td><span class="tg" style="background:${TC[tp[0]]}20;color:${TCD[tp[0]]||TC[tp[0]]};font-weight:600">${tp[0]}</span></td></tr>`});return h+"</tbody></table>"}
+function rSupplier(d){const t=d.reduce((s,r)=>s+r.qty,0);const m={};d.forEach(r=>{if(!m[r.sup])m[r.sup]={s:r.sup,q:0,c:0,br:new Set(),tp:{}};m[r.sup].q+=r.qty;m[r.sup].c++;m[r.sup].br.add(r.brand);m[r.sup].tp[r.type]=(m[r.sup].tp[r.type]||0)+r.qty});const ls=Object.values(m).sort((a,b)=>b.q-a.q).slice(0,8);const rc=["rk1","rk1","rk2","rk3"];let h=`<div class="ct">${CN.supplier}</div><table class="dt"><thead><tr><th></th><th>업체명</th><th class="r">건</th><th class="r">수량</th><th class="c">브랜드</th><th>이슈</th></tr></thead><tbody>`;ls.forEach((s,i)=>{const tpList=Object.entries(s.tp).sort((a,b)=>b[1]-a[1]);const top=tpList[0];const others=tpList.length-1;const tooltip=tpList.map(([k,v])=>k+" "+fmt(v)).join("\n");h+=`<tr><td><span class="rk ${rc[i]||"rkn"}">${i+1}</span></td><td style="font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.s}</td><td class="r">${s.c}</td><td class="r" style="font-weight:700">${fmt(s.q)}</td><td class="c" style="font-size:10px">${[...s.br].slice(0,2).join(", ")}</td><td title="${tooltip}" style="cursor:default"><span class="tg" style="background:${TC[top[0]]}20;color:${TCD[top[0]]||TC[top[0]]};font-weight:600">${top[0]}</span>${others>0?`<span style="font-size:9px;color:#999;margin-left:3px">외 ${others}</span>`:""}</td></tr>`});return h+"</tbody></table>"}
 
 function rRepeat(d){const m={};d.forEach(r=>{const k=r.sup+"|||"+r.type;if(!m[k])m[k]={sup:r.sup,type:r.type,cnt:0,qty:0,br:new Set(),ds:new Set()};m[k].cnt++;m[k].qty+=r.qty;m[k].br.add(r.brand);m[k].ds.add(r.d)});const reps=Object.values(m).filter(x=>x.cnt>=3).sort((a,b)=>b.cnt-a.cnt);const sub=gT("repeat");const ed=editing?` contenteditable="true" onblur="sT('repeat',this.textContent)"`:"";let h=`<div class="ct">${CN.repeat} <span class="editable-sub"${ed}>${sub}</span></div>`;if(!reps.length)return h+`<div style="color:#aaa;font-size:12px;padding:12px;text-align:center">해당 조건에 반복 이슈 없음</div>`;return h+reps.slice(0,6).map(x=>`<div class="rr"><div class="rc">${x.cnt}회</div><div class="ri"><div class="rn">${x.sup} <span class="at">${x.type}</span></div><div class="rd">${[...x.br].join(", ")} · ${x.ds.size}일간</div></div><div class="rq">${fmt(x.qty)}</div></div>`).join("")}
 
