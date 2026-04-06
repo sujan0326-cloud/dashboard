@@ -153,9 +153,11 @@ body.editing .editable-sub[contenteditable=true]{background:#fef9e7;border:1px d
 
 /* Upload bar */
 .upload-bar{display:flex;align-items:center;gap:8px;padding:2px 0}
-.upload-btn{font-size:10px;padding:4px 12px;border-radius:4px;border:1px solid #4a6fa5;background:#e4ecf4;color:#4a6fa5;cursor:pointer;font-family:inherit;font-weight:600;display:flex;align-items:center;gap:4px;transition:all 0.15s}
+.upload-btn{font-size:10px;padding:4px 12px;border-radius:4px;border:1px solid #4a6fa5;background:#e4ecf4;color:#4a6fa5;cursor:pointer;font-family:inherit;font-weight:600;display:none;align-items:center;gap:4px;transition:all 0.15s}
 .upload-btn:hover{background:#4a6fa5;color:#fff}
-.upload-info{font-size:10px;color:#888}
+body.editing .upload-btn{display:inline-flex}
+.upload-info{font-size:10px;color:#888;display:none}
+body.editing .upload-info{display:inline}
 .upload-file{font-size:10px;color:#4a6fa5;font-weight:600}
 </style>
 </head>
@@ -214,15 +216,15 @@ body.editing .editable-sub[contenteditable=true]{background:#fef9e7;border:1px d
 
 <script>
 // ═══ DATA ═══
-let RAW=[{d:"03/03",brand:"K2",sup:"더 코어",cat:"용품",ret:true,qty:10,type:"박스바코드"},{d:"03/03",brand:"K2",sup:"아이케이지",cat:"의류",ret:true,qty:6,type:"RFID"},{d:"03/03",brand:"EIDER",sup:"피앤지아이엔씨",cat:"용품",ret:true,qty:43,type:"사이즈교차"},{d:"03/03",brand:"DYNAFIT",sup:"아이보리",cat:"의류",ret:false,qty:80,type:"전산오류"},{d:"03/03",brand:"DYNAFIT",sup:"서흥",cat:"신발",ret:true,qty:45,type:"박스바코드"},{d:"03/03",brand:"DYNAFIT",sup:"서흥",cat:"신발",ret:true,qty:908,type:"사이즈교차"},{d:"03/03",brand:"NORDISK",sup:"비하임",cat:"의류",ret:false,qty:65,type:"미입고"},{d:"03/03",brand:"WIDE ANGLE",sup:"유림호시",cat:"의류",ret:false,qty:944,type:"통관지연"},{d:"03/04",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:1,type:"QC불량"},{d:"03/04",brand:"K2",sup:"애드포스",cat:"신발",ret:false,qty:1128,type:"전산오류"},{d:"03/04",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:true,qty:7,type:"QC불량"},{d:"03/04",brand:"EIDER",sup:"현대케미칼",cat:"의류",ret:true,qty:794,type:"QC불량"},{d:"03/04",brand:"EIDER",sup:"현대케미칼",cat:"의류",ret:true,qty:45,type:"QC불량"},{d:"03/04",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:false,qty:2053,type:"통관지연"},{d:"03/04",brand:"WIDE ANGLE",sup:"유림호시",cat:"의류",ret:true,qty:2,type:"RFID"},{d:"03/05",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:504,type:"QC불량"},{d:"03/06",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:544,type:"QC불량"},{d:"03/06",brand:"K2",sup:"보광캡",cat:"용품",ret:true,qty:1000,type:"수량오류"},{d:"03/06",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:true,qty:900,type:"QC불량"},{d:"03/06",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:true,qty:1991,type:"QC불량"},{d:"03/06",brand:"NORDISK",sup:"비하임",cat:"의류",ret:true,qty:242,type:"생산지연"},{d:"03/09",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:1,type:"QC불량"},{d:"03/09",brand:"K2",sup:"아이보리",cat:"의류",ret:false,qty:79,type:"미입고"},{d:"03/09",brand:"K2",sup:"보광캡",cat:"용품",ret:true,qty:2,type:"RFID"},{d:"03/09",brand:"K2",sup:"거림씨앤에프",cat:"의류",ret:true,qty:7,type:"사이즈교차"},{d:"03/09",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:1,type:"QC불량"},{d:"03/09",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:272,type:"박스바코드"},{d:"03/09",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:840,type:"패킹오류"},{d:"03/09",brand:"EIDER",sup:"JIE JIE",cat:"신발",ret:true,qty:5,type:"QC불량"},{d:"03/09",brand:"DYNAFIT",sup:"삼덕통상",cat:"신발",ret:true,qty:289,type:"박스바코드"},{d:"03/10",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:7,type:"QC불량"},{d:"03/10",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:1206,type:"QC불량"},{d:"03/10",brand:"K2",sup:"보광캡",cat:"용품",ret:true,qty:7,type:"RFID"},{d:"03/10",brand:"EIDER",sup:"더 코어",cat:"용품",ret:true,qty:910,type:"생산지연"},{d:"03/10",brand:"DYNAFIT",sup:"SWI이노베이션",cat:"의류",ret:true,qty:2250,type:"예약오류"},{d:"03/10",brand:"WIDE ANGLE",sup:"인티모",cat:"의류",ret:true,qty:3,type:"RFID"},{d:"03/11",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:151,type:"QC불량"},{d:"03/11",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:8,type:"패킹오류"},{d:"03/11",brand:"DYNAFIT",sup:"삼덕통상",cat:"신발",ret:true,qty:152,type:"박스바코드"},{d:"03/12",brand:"K2",sup:"거림씨앤에프",cat:"의류",ret:true,qty:1,type:"RFID"},{d:"03/12",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:true,qty:93,type:"QC불량"},{d:"03/12",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:true,qty:390,type:"QC불량"},{d:"03/12",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:true,qty:42,type:"RFID"},{d:"03/12",brand:"EIDER",sup:"더 코어",cat:"용품",ret:true,qty:680,type:"미입고"},{d:"03/12",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:true,qty:50,type:"미입고"},{d:"03/13",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:6,type:"QC불량"},{d:"03/13",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:928,type:"QC불량"},{d:"03/13",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:8,type:"사이즈교차"},{d:"03/13",brand:"K2",sup:"케이씨인터내셔널",cat:"신발",ret:true,qty:8,type:"QC불량"},{d:"03/13",brand:"K2",sup:"아이케이지",cat:"의류",ret:false,qty:33,type:"미입고"},{d:"03/13",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:270,type:"패킹오류"},{d:"03/13",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:50,type:"패킹오류"},{d:"03/13",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:120,type:"예약오류"},{d:"03/13",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:72,type:"예약오류"},{d:"03/13",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:162,type:"예약오류"},{d:"03/13",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:3,type:"RFID"},{d:"03/13",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:3,type:"QC불량"},{d:"03/13",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:8,type:"박스바코드"},{d:"03/13",brand:"EIDER",sup:"SWI이노베이션",cat:"의류",ret:true,qty:50,type:"사이즈교차"},{d:"03/13",brand:"EIDER",sup:"SWI이노베이션",cat:"의류",ret:true,qty:8,type:"RFID"},{d:"03/13",brand:"EIDER",sup:"더 코어",cat:"용품",ret:false,qty:1520,type:"미입고"},{d:"03/13",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:false,qty:195,type:"생산지연"},{d:"03/13",brand:"WIDE ANGLE",sup:"메이븐에프씨",cat:"의류",ret:false,qty:900,type:"생산지연"},{d:"03/13",brand:"WIDE ANGLE",sup:"태화에프앤티",cat:"의류",ret:true,qty:40,type:"RFID"},{d:"03/16",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:30,type:"QC불량"},{d:"03/16",brand:"K2",sup:"아이보리",cat:"의류",ret:false,qty:48,type:"예약오류"},{d:"03/16",brand:"K2",sup:"보광캡",cat:"용품",ret:true,qty:1,type:"RFID"},{d:"03/16",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:408,type:"박스바코드"},{d:"03/16",brand:"EIDER",sup:"더 코어",cat:"용품",ret:false,qty:680,type:"미입고"},{d:"03/16",brand:"DYNAFIT",sup:"삼덕통상",cat:"신발",ret:true,qty:57,type:"박스바코드"},{d:"03/16",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:false,qty:31,type:"예약오류"},{d:"03/16",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:50,type:"예약오류"},{d:"03/16",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:60,type:"예약오류"},{d:"03/16",brand:"NORDISK",sup:"아이보리",cat:"의류",ret:false,qty:62,type:"예약오류"},{d:"03/16",brand:"NORDISK",sup:"알피티트레이딩",cat:"의류",ret:false,qty:2,type:"예약오류"},{d:"03/16",brand:"NORDISK",sup:"알피티트레이딩",cat:"의류",ret:true,qty:3,type:"RFID"},{d:"03/17",brand:"WIDE ANGLE",sup:"메이븐에프씨",cat:"의류",ret:true,qty:10,type:"사이즈교차"},{d:"03/17",brand:"NORDISK",sup:"레오캡",cat:"용품",ret:true,qty:100,type:"패킹오류"},{d:"03/17",brand:"NORDISK",sup:"레오캡",cat:"용품",ret:true,qty:1,type:"RFID"},{d:"03/18",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:true,qty:5,type:"QC불량"},{d:"03/18",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:true,qty:450,type:"예약오류"},{d:"03/18",brand:"EIDER",sup:"더 코어",cat:"용품",ret:false,qty:971,type:"통관지연"},{d:"03/18",brand:"EIDER",sup:"아이케이지",cat:"의류",ret:false,qty:1,type:"사이즈교차"},{d:"03/18",brand:"DYNAFIT",sup:"삼덕통상",cat:"신발",ret:false,qty:1,type:"미입고"},{d:"03/18",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:true,qty:5,type:"RFID"},{d:"03/18",brand:"DYNAFIT",sup:"레드트레인",cat:"신발",ret:true,qty:12,type:"QC불량"},{d:"03/18",brand:"DYNAFIT",sup:"레드트레인",cat:"신발",ret:true,qty:16,type:"예약오류"},{d:"03/18",brand:"DYNAFIT",sup:"레드트레인",cat:"신발",ret:true,qty:24,type:"사이즈교차"},{d:"03/18",brand:"DYNAFIT",sup:"월드어패럴",cat:"의류",ret:false,qty:1,type:"미입고"},{d:"03/19",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:3,type:"QC불량"},{d:"03/19",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:false,qty:17,type:"미입고"},{d:"03/19",brand:"EIDER",sup:"더 코어",cat:"용품",ret:true,qty:13,type:"생산지연"},{d:"03/19",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:1,type:"미입고"},{d:"03/19",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:true,qty:8,type:"예약오류"},{d:"03/20",brand:"K2",sup:"바라크",cat:"신발",ret:true,qty:4,type:"QC불량"},{d:"03/20",brand:"EIDER",sup:"아이케이지",cat:"의류",ret:true,qty:810,type:"패킹오류"},{d:"03/23",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:100,type:"사이즈교차"},{d:"03/23",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:2,type:"RFID"},{d:"03/23",brand:"DYNAFIT",sup:"디오원",cat:"의류",ret:true,qty:10,type:"RFID"},{d:"03/23",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:696,type:"통관지연"},{d:"03/24",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:1850,type:"QC불량"},{d:"03/24",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:24,type:"사이즈교차"},{d:"03/24",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:176,type:"박스바코드"},{d:"03/24",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:76,type:"미입고"},{d:"03/24",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:true,qty:63,type:"수량오류"},{d:"03/24",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:true,qty:110,type:"패킹오류"},{d:"03/24",brand:"NORDISK",sup:"비하임",cat:"의류",ret:false,qty:657,type:"통관지연"},{d:"03/25",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:6,type:"QC불량"},{d:"03/25",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:true,qty:4,type:"RFID"},{d:"03/25",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:337,type:"박스바코드"},{d:"03/25",brand:"WIDE ANGLE",sup:"메이븐에프씨",cat:"의류",ret:true,qty:1,type:"RFID"},{d:"03/25",brand:"WIDE ANGLE",sup:"H&Y상사",cat:"신발",ret:true,qty:2,type:"QC불량"},{d:"03/25",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:17,type:"미입고"},{d:"03/26",brand:"K2",sup:"보광캡",cat:"용품",ret:false,qty:81,type:"수량오류"},{d:"03/26",brand:"K2",sup:"거림씨앤에프",cat:"의류",ret:false,qty:2000,type:"생산지연"},{d:"03/26",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:false,qty:2306,type:"생산지연"},{d:"03/26",brand:"DYNAFIT",sup:"거림씨앤에프",cat:"의류",ret:true,qty:440,type:"사이즈교차"},{d:"03/26",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:true,qty:1,type:"RFID"},{d:"03/26",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:false,qty:1,type:"수량오류"},{d:"03/27",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:7,type:"QC불량"},{d:"03/27",brand:"K2",sup:"거림씨앤에프",cat:"의류",ret:false,qty:333,type:"수량오류"},{d:"03/27",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:true,qty:600,type:"패킹오류"},{d:"03/27",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:false,qty:19,type:"수량오류"},{d:"03/27",brand:"DYNAFIT",sup:"아이보리",cat:"의류",ret:false,qty:63,type:"미입고"},{d:"03/27",brand:"DYNAFIT",sup:"코아플러스",cat:"용품",ret:true,qty:80,type:"RFID"},{d:"03/27",brand:"DYNAFIT",sup:"레드트레인",cat:"신발",ret:true,qty:2,type:"QC불량"},{d:"03/30",brand:"K2",sup:"거림씨앤에프",cat:"의류",ret:false,qty:374,type:"예약오류"},{d:"03/30",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:false,qty:85,type:"예약오류"},{d:"03/30",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:4,type:"RFID"},{d:"03/30",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:false,qty:321,type:"미입고"},{d:"03/30",brand:"EIDER",sup:"바라크",cat:"신발",ret:true,qty:300,type:"패킹오류"},{d:"03/30",brand:"EIDER",sup:"바라크",cat:"신발",ret:true,qty:64,type:"예약오류"},{d:"03/30",brand:"DYNAFIT",sup:"아이보리",cat:"의류",ret:false,qty:3310,type:"미입고"},{d:"03/30",brand:"DYNAFIT",sup:"거림씨앤에프",cat:"의류",ret:false,qty:98,type:"예약오류"},{d:"03/30",brand:"DYNAFIT",sup:"세일통영",cat:"신발",ret:true,qty:15,type:"QC불량"},{d:"03/30",brand:"DYNAFIT",sup:"디오원",cat:"의류",ret:false,qty:162,type:"예약오류"},{d:"03/31",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:2,type:"QC불량"},{d:"03/31",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:true,qty:96,type:"RFID"},{d:"03/31",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:false,qty:166,type:"미입고"},{d:"03/31",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:344,type:"박스바코드"},{d:"03/31",brand:"EIDER",sup:"레드트레인",cat:"신발",ret:true,qty:1,type:"QC불량"},{d:"03/31",brand:"DYNAFIT",sup:"오디에스컴퍼니",cat:"의류",ret:false,qty:15,type:"수량오류"},{d:"03/31",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:119,type:"미입고"},{d:"03/31",brand:"DYNAFIT",sup:"레드트레인",cat:"신발",ret:true,qty:1,type:"QC불량"}];
+let RAW=[{d:"03/03",brand:"K2",sup:"더 코어",cat:"용품",ret:true,qty:10,type:"박스바코드 불량"},{d:"03/03",brand:"K2",sup:"아이케이지",cat:"의류",ret:true,qty:6,type:"RFID 불량"},{d:"03/03",brand:"EIDER",sup:"피앤지아이엔씨",cat:"용품",ret:true,qty:43,type:"사이즈교차"},{d:"03/03",brand:"DYNAFIT",sup:"아이보리",cat:"의류",ret:false,qty:80,type:"예약오류"},{d:"03/03",brand:"DYNAFIT",sup:"서흥",cat:"신발",ret:true,qty:45,type:"박스바코드 불량"},{d:"03/03",brand:"DYNAFIT",sup:"서흥",cat:"신발",ret:true,qty:908,type:"사이즈교차"},{d:"03/03",brand:"NORDISK",sup:"비하임",cat:"의류",ret:false,qty:65,type:"미입고"},{d:"03/03",brand:"WIDE ANGLE",sup:"유림호시",cat:"의류",ret:false,qty:944,type:"통관지연"},{d:"03/04",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:1,type:"QC불량"},{d:"03/04",brand:"K2",sup:"애드포스",cat:"신발",ret:false,qty:1128,type:"예약오류"},{d:"03/04",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:true,qty:7,type:"QC불량"},{d:"03/04",brand:"EIDER",sup:"현대케미칼",cat:"의류",ret:true,qty:794,type:"QC불량"},{d:"03/04",brand:"EIDER",sup:"현대케미칼",cat:"의류",ret:true,qty:45,type:"QC불량"},{d:"03/04",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:false,qty:2053,type:"통관지연"},{d:"03/04",brand:"WIDE ANGLE",sup:"유림호시",cat:"의류",ret:true,qty:2,type:"RFID 불량"},{d:"03/05",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:504,type:"QC불량"},{d:"03/06",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:544,type:"QC불량"},{d:"03/06",brand:"K2",sup:"보광캡",cat:"용품",ret:true,qty:1000,type:"수량오류"},{d:"03/06",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:true,qty:900,type:"QC불량"},{d:"03/06",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:true,qty:1991,type:"QC불량"},{d:"03/06",brand:"NORDISK",sup:"비하임",cat:"의류",ret:true,qty:242,type:"생산지연"},{d:"03/09",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:1,type:"QC불량"},{d:"03/09",brand:"K2",sup:"아이보리",cat:"의류",ret:false,qty:79,type:"미입고"},{d:"03/09",brand:"K2",sup:"보광캡",cat:"용품",ret:true,qty:2,type:"RFID 불량"},{d:"03/09",brand:"K2",sup:"거림씨앤에프",cat:"의류",ret:true,qty:7,type:"사이즈교차"},{d:"03/09",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:1,type:"QC불량"},{d:"03/09",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:272,type:"박스바코드 불량"},{d:"03/09",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:840,type:"패킹오류"},{d:"03/09",brand:"EIDER",sup:"JIE JIE",cat:"신발",ret:true,qty:5,type:"QC불량"},{d:"03/09",brand:"DYNAFIT",sup:"삼덕통상",cat:"신발",ret:true,qty:289,type:"박스바코드 불량"},{d:"03/10",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:7,type:"QC불량"},{d:"03/10",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:1206,type:"QC불량"},{d:"03/10",brand:"K2",sup:"보광캡",cat:"용품",ret:true,qty:7,type:"RFID 불량"},{d:"03/10",brand:"EIDER",sup:"더 코어",cat:"용품",ret:true,qty:910,type:"생산지연"},{d:"03/10",brand:"DYNAFIT",sup:"SWI이노베이션",cat:"의류",ret:true,qty:2250,type:"예약오류"},{d:"03/10",brand:"WIDE ANGLE",sup:"인티모",cat:"의류",ret:true,qty:3,type:"RFID 불량"},{d:"03/11",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:151,type:"QC불량"},{d:"03/11",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:8,type:"패킹오류"},{d:"03/11",brand:"DYNAFIT",sup:"삼덕통상",cat:"신발",ret:true,qty:152,type:"박스바코드 불량"},{d:"03/12",brand:"K2",sup:"거림씨앤에프",cat:"의류",ret:true,qty:1,type:"RFID 불량"},{d:"03/12",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:true,qty:93,type:"QC불량"},{d:"03/12",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:true,qty:390,type:"QC불량"},{d:"03/12",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:true,qty:42,type:"RFID 불량"},{d:"03/12",brand:"EIDER",sup:"더 코어",cat:"용품",ret:true,qty:680,type:"미입고"},{d:"03/12",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:true,qty:50,type:"미입고"},{d:"03/13",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:6,type:"QC불량"},{d:"03/13",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:928,type:"QC불량"},{d:"03/13",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:8,type:"사이즈교차"},{d:"03/13",brand:"K2",sup:"케이씨인터내셔널",cat:"신발",ret:true,qty:8,type:"QC불량"},{d:"03/13",brand:"K2",sup:"아이케이지",cat:"의류",ret:false,qty:33,type:"미입고"},{d:"03/13",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:270,type:"패킹오류"},{d:"03/13",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:50,type:"패킹오류"},{d:"03/13",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:120,type:"예약오류"},{d:"03/13",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:72,type:"예약오류"},{d:"03/13",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:162,type:"예약오류"},{d:"03/13",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:3,type:"RFID 불량"},{d:"03/13",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:3,type:"QC불량"},{d:"03/13",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:8,type:"박스바코드 불량"},{d:"03/13",brand:"EIDER",sup:"SWI이노베이션",cat:"의류",ret:true,qty:50,type:"사이즈교차"},{d:"03/13",brand:"EIDER",sup:"SWI이노베이션",cat:"의류",ret:true,qty:8,type:"RFID 불량"},{d:"03/13",brand:"EIDER",sup:"더 코어",cat:"용품",ret:false,qty:1520,type:"미입고"},{d:"03/13",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:false,qty:195,type:"생산지연"},{d:"03/13",brand:"WIDE ANGLE",sup:"메이븐에프씨",cat:"의류",ret:false,qty:900,type:"생산지연"},{d:"03/13",brand:"WIDE ANGLE",sup:"태화에프앤티",cat:"의류",ret:true,qty:40,type:"RFID 불량"},{d:"03/16",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:30,type:"QC불량"},{d:"03/16",brand:"K2",sup:"아이보리",cat:"의류",ret:false,qty:48,type:"예약오류"},{d:"03/16",brand:"K2",sup:"보광캡",cat:"용품",ret:true,qty:1,type:"RFID 불량"},{d:"03/16",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:408,type:"박스바코드 불량"},{d:"03/16",brand:"EIDER",sup:"더 코어",cat:"용품",ret:false,qty:680,type:"미입고"},{d:"03/16",brand:"DYNAFIT",sup:"삼덕통상",cat:"신발",ret:true,qty:57,type:"박스바코드 불량"},{d:"03/16",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:false,qty:31,type:"예약오류"},{d:"03/16",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:50,type:"예약오류"},{d:"03/16",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:60,type:"예약오류"},{d:"03/16",brand:"NORDISK",sup:"아이보리",cat:"의류",ret:false,qty:62,type:"예약오류"},{d:"03/16",brand:"NORDISK",sup:"알피티트레이딩",cat:"의류",ret:false,qty:2,type:"예약오류"},{d:"03/16",brand:"NORDISK",sup:"알피티트레이딩",cat:"의류",ret:true,qty:3,type:"RFID 불량"},{d:"03/17",brand:"WIDE ANGLE",sup:"메이븐에프씨",cat:"의류",ret:true,qty:10,type:"사이즈교차"},{d:"03/17",brand:"NORDISK",sup:"레오캡",cat:"용품",ret:true,qty:100,type:"패킹오류"},{d:"03/17",brand:"NORDISK",sup:"레오캡",cat:"용품",ret:true,qty:1,type:"RFID 불량"},{d:"03/18",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:true,qty:5,type:"QC불량"},{d:"03/18",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:true,qty:450,type:"예약오류"},{d:"03/18",brand:"EIDER",sup:"더 코어",cat:"용품",ret:false,qty:971,type:"통관지연"},{d:"03/18",brand:"EIDER",sup:"아이케이지",cat:"의류",ret:false,qty:1,type:"사이즈교차"},{d:"03/18",brand:"DYNAFIT",sup:"삼덕통상",cat:"신발",ret:false,qty:1,type:"미입고"},{d:"03/18",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:true,qty:5,type:"RFID 불량"},{d:"03/18",brand:"DYNAFIT",sup:"레드트레인",cat:"신발",ret:true,qty:12,type:"QC불량"},{d:"03/18",brand:"DYNAFIT",sup:"레드트레인",cat:"신발",ret:true,qty:16,type:"예약오류"},{d:"03/18",brand:"DYNAFIT",sup:"레드트레인",cat:"신발",ret:true,qty:24,type:"사이즈교차"},{d:"03/18",brand:"DYNAFIT",sup:"월드어패럴",cat:"의류",ret:false,qty:1,type:"미입고"},{d:"03/19",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:3,type:"QC불량"},{d:"03/19",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:false,qty:17,type:"미입고"},{d:"03/19",brand:"EIDER",sup:"더 코어",cat:"용품",ret:true,qty:13,type:"생산지연"},{d:"03/19",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:1,type:"미입고"},{d:"03/19",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:true,qty:8,type:"예약오류"},{d:"03/20",brand:"K2",sup:"바라크",cat:"신발",ret:true,qty:4,type:"QC불량"},{d:"03/20",brand:"EIDER",sup:"아이케이지",cat:"의류",ret:true,qty:810,type:"패킹오류"},{d:"03/23",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:100,type:"사이즈교차"},{d:"03/23",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:2,type:"RFID 불량"},{d:"03/23",brand:"DYNAFIT",sup:"디오원",cat:"의류",ret:true,qty:10,type:"RFID 불량"},{d:"03/23",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:696,type:"통관지연"},{d:"03/24",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:1850,type:"QC불량"},{d:"03/24",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:24,type:"사이즈교차"},{d:"03/24",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:176,type:"박스바코드 불량"},{d:"03/24",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:76,type:"미입고"},{d:"03/24",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:true,qty:63,type:"수량오류"},{d:"03/24",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:true,qty:110,type:"패킹오류"},{d:"03/24",brand:"NORDISK",sup:"비하임",cat:"의류",ret:false,qty:657,type:"통관지연"},{d:"03/25",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:6,type:"QC불량"},{d:"03/25",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:true,qty:4,type:"RFID 불량"},{d:"03/25",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:337,type:"박스바코드 불량"},{d:"03/25",brand:"WIDE ANGLE",sup:"메이븐에프씨",cat:"의류",ret:true,qty:1,type:"RFID 불량"},{d:"03/25",brand:"WIDE ANGLE",sup:"H&Y상사",cat:"신발",ret:true,qty:2,type:"QC불량"},{d:"03/25",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:17,type:"미입고"},{d:"03/26",brand:"K2",sup:"보광캡",cat:"용품",ret:false,qty:81,type:"수량오류"},{d:"03/26",brand:"K2",sup:"거림씨앤에프",cat:"의류",ret:false,qty:2000,type:"생산지연"},{d:"03/26",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:false,qty:2306,type:"생산지연"},{d:"03/26",brand:"DYNAFIT",sup:"거림씨앤에프",cat:"의류",ret:true,qty:440,type:"사이즈교차"},{d:"03/26",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:true,qty:1,type:"RFID 불량"},{d:"03/26",brand:"DYNAFIT",sup:"성민스포츠",cat:"의류",ret:false,qty:1,type:"수량오류"},{d:"03/27",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:7,type:"QC불량"},{d:"03/27",brand:"K2",sup:"거림씨앤에프",cat:"의류",ret:false,qty:333,type:"수량오류"},{d:"03/27",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:true,qty:600,type:"패킹오류"},{d:"03/27",brand:"EIDER",sup:"티피나디아",cat:"의류",ret:false,qty:19,type:"수량오류"},{d:"03/27",brand:"DYNAFIT",sup:"아이보리",cat:"의류",ret:false,qty:63,type:"미입고"},{d:"03/27",brand:"DYNAFIT",sup:"코아플러스",cat:"용품",ret:true,qty:80,type:"RFID 불량"},{d:"03/27",brand:"DYNAFIT",sup:"레드트레인",cat:"신발",ret:true,qty:2,type:"QC불량"},{d:"03/30",brand:"K2",sup:"거림씨앤에프",cat:"의류",ret:false,qty:374,type:"예약오류"},{d:"03/30",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:false,qty:85,type:"예약오류"},{d:"03/30",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:true,qty:4,type:"RFID 불량"},{d:"03/30",brand:"EIDER",sup:"갤러리드솔레이",cat:"의류",ret:false,qty:321,type:"미입고"},{d:"03/30",brand:"EIDER",sup:"바라크",cat:"신발",ret:true,qty:300,type:"패킹오류"},{d:"03/30",brand:"EIDER",sup:"바라크",cat:"신발",ret:true,qty:64,type:"예약오류"},{d:"03/30",brand:"DYNAFIT",sup:"아이보리",cat:"의류",ret:false,qty:3310,type:"미입고"},{d:"03/30",brand:"DYNAFIT",sup:"거림씨앤에프",cat:"의류",ret:false,qty:98,type:"예약오류"},{d:"03/30",brand:"DYNAFIT",sup:"세일통영",cat:"신발",ret:true,qty:15,type:"QC불량"},{d:"03/30",brand:"DYNAFIT",sup:"디오원",cat:"의류",ret:false,qty:162,type:"예약오류"},{d:"03/31",brand:"K2",sup:"삼덕통상",cat:"신발",ret:true,qty:2,type:"QC불량"},{d:"03/31",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:true,qty:96,type:"RFID 불량"},{d:"03/31",brand:"EIDER",sup:"거림씨앤에프",cat:"의류",ret:false,qty:166,type:"미입고"},{d:"03/31",brand:"EIDER",sup:"삼덕통상",cat:"신발",ret:true,qty:344,type:"박스바코드 불량"},{d:"03/31",brand:"EIDER",sup:"레드트레인",cat:"신발",ret:true,qty:1,type:"QC불량"},{d:"03/31",brand:"DYNAFIT",sup:"오디에스컴퍼니",cat:"의류",ret:false,qty:15,type:"수량오류"},{d:"03/31",brand:"DYNAFIT",sup:"JSA어패럴",cat:"의류",ret:false,qty:119,type:"미입고"},{d:"03/31",brand:"DYNAFIT",sup:"레드트레인",cat:"신발",ret:true,qty:1,type:"QC불량"}];
 
 let DATES=[...new Set(RAW.map(r=>r.d))].sort(),DSET=new Set(DATES);
 let BRANDS=[...new Set(RAW.map(r=>r.brand))].sort();
 const BC={K2:"#4a90a4",EIDER:"#c0625a",DYNAFIT:"#d4915e","WIDE ANGLE":"#6a9f7e",NORDISK:"#8b7ec7",PIRETTI:"#8a9b68"};
-const TYPES=["QC불량","미입고","예약오류","패킹오류","박스바코드","RFID","사이즈교차","통관지연","생산지연","수량오류","전산오류"];
-const TC={QC불량:"#e8928d",미입고:"#95a5a6",예약오류:"#e8c18d",패킹오류:"#a8a0d6",박스바코드:"#7db8d4",RFID:"#7db5b5",사이즈교차:"#b5a8d6",통관지연:"#d4c47d",생산지연:"#b5c4c4",수량오류:"#d4a07d",전산오류:"#7dc4b0"};
+const TYPES=["QC불량","미입고","예약오류","패킹오류","박스바코드 불량","RFID 불량","사이즈교차","통관지연","생산지연","수량오류","패킹 미등록"];
+const TC={QC불량:"#e8928d",미입고:"#95a5a6",예약오류:"#e8c18d",패킹오류:"#a8a0d6","박스바코드 불량":"#7db8d4","RFID 불량":"#7db5b5",사이즈교차:"#b5a8d6",통관지연:"#d4c47d",생산지연:"#b5c4c4",수량오류:"#d4a07d","패킹 미등록":"#7dc4b0"};
 const CN={kpi:"핵심 지표 요약",trend:"일별 이슈 추이",brand:"브랜드별 이슈 수량",issue:"이슈 유형별 현황",supplier:"주의 업체 TOP 8",repeat:"반복 이슈 업체",detail:"상세 이슈 목록"};
-const TCD={QC불량:"#b04540",미입고:"#4a5a5e",예약오류:"#a07838",패킹오류:"#5a48a0",박스바코드:"#2a6e90",RFID:"#2a7070",사이즈교차:"#6a50a8",통관지연:"#8a7820",생산지연:"#606e6e",수량오류:"#904e20",전산오류:"#2a7a60"};
+const TCD={QC불량:"#b04540",미입고:"#4a5a5e",예약오류:"#a07838",패킹오류:"#5a48a0","박스바코드 불량":"#2a6e90","RFID 불량":"#2a7070",사이즈교차:"#6a50a8",통관지연:"#8a7820",생산지연:"#606e6e",수량오류:"#904e20","패킹 미등록":"#2a7a60"};
 const fmt=n=>n.toLocaleString();
 let selD=new Set(DATES),selB=new Set(),editing=false,dF={sup:"전체",brand:"전체",type:"전체"};
 let dFDates=new Set();
@@ -239,16 +241,17 @@ function classifyIssue(detail){
   if(!detail) return "기타";
   const d=detail.toLowerCase();
   if(d.includes("qc")||d.includes("검수")) return "QC불량";
-  if(d.includes("rfid")||(d.includes("칩")&&(d.includes("불량")||d.includes("인식")))) return "RFID";
-  if(d.includes("박스")&&(d.includes("바코드")||d.includes("인식"))) return "박스바코드";
+  if(d.includes("rfid")||(d.includes("칩")&&(d.includes("불량")||d.includes("인식")))) return "RFID 불량";
+  if(d.includes("박스")&&(d.includes("바코드")||d.includes("인식"))) return "박스바코드 불량";
   if(d.includes("사이즈")||d.includes("교차")&&!d.includes("통관")) return "사이즈교차";
   if(d.includes("예약")&&(d.includes("수량")||d.includes("상이")||d.includes("오등록")||d.includes("오류")||d.includes("등록"))) return "예약오류";
+  if(d.includes("전산")&&d.includes("오등록")) return "예약오류";
   if(d.includes("미입고")||d.includes("미선적")) return "미입고";
   if(d.includes("통관")) return "통관지연";
   if(d.includes("생산")||(d.includes("지연")&&!d.includes("통관"))) return "생산지연";
   if(d.includes("수량")&&(d.includes("초과")||d.includes("오등록"))) return "수량오류";
+  if(d.includes("패킹")&&d.includes("미등록")) return "패킹 미등록";
   if(d.includes("출고")||d.includes("패킹")||d.includes("아소트")) return "패킹오류";
-  if(d.includes("전산")) return "전산오류";
   return "기타";
 }
 
@@ -275,6 +278,7 @@ function parseExcel(workbook){
       else if(h.includes("반송")) ci.ret=i;
       else if(h==="수량"||h==="수량▼"||h.includes("수량")) ci.qty=i;
       else if(h.includes("상세")||h.includes("내용")) ci.detail=i;
+      else if(h.includes("이슈유형")||h.includes("이슈 유형")) ci.issueType=i;
     });
     if(ci.date===undefined||ci.brand===undefined) return;
     for(let i=headerRow+1;i<rows.length;i++){
@@ -302,7 +306,7 @@ function parseExcel(workbook){
       const isRet=retStr==="O"||retStr==="●"||retStr==="o";
       const qty=parseInt(r[ci.qty])||0;
       const detail=String(r[ci.detail]||"").trim();
-      const type=classifyIssue(detail);
+      const type=(ci.issueType!==undefined && String(r[ci.issueType]||"").trim()) ? String(r[ci.issueType]).trim() : classifyIssue(detail);
       if(qty>0) newData.push({d:dStr,brand,sup,cat,ret:isRet,qty,type});
     }
   });
@@ -328,6 +332,15 @@ function loadData(data,fileName){
     const mMatch=fileName.match(/(\d{1,2})월/);
     if(mMatch) document.querySelector(".topbar-sub").textContent="| "+mMatch[1]+"월 대시보드";
   }
+  // Auto-navigate calendar to the latest month in data
+  if(DATES.length>0){
+    const lastDate=DATES[DATES.length-1]; // e.g. "04/03"
+    const mm=parseInt(lastDate.split("/")[0]);
+    calViewM=mm-1; // 0-indexed
+    calViewY=2026; // default year
+    detCalVM=mm-1;
+    detCalVY=2026;
+  }
   // Update UI
   document.getElementById("uploadInfo").innerHTML=`<span class="upload-file">${fileName}</span> 로드 완료 (${RAW.length}건)`;
   uCL();initB();fillCards();
@@ -347,18 +360,40 @@ function handleFile(file){
   reader.readAsArrayBuffer(file);
 }
 
-// ═══ DRAG & DROP ═══
+// ═══ DRAG & DROP (edit mode only) ═══
 const dropOverlay=document.getElementById("dropOverlay");
 let dragCounter=0;
-document.addEventListener("dragenter",e=>{e.preventDefault();dragCounter++;dropOverlay.classList.add("show")});
+document.addEventListener("dragenter",e=>{e.preventDefault();if(!editing)return;dragCounter++;dropOverlay.classList.add("show")});
 document.addEventListener("dragleave",e=>{e.preventDefault();dragCounter--;if(dragCounter<=0){dragCounter=0;dropOverlay.classList.remove("show")}});
 document.addEventListener("dragover",e=>{e.preventDefault()});
 document.addEventListener("drop",e=>{
   e.preventDefault();dragCounter=0;dropOverlay.classList.remove("show");
+  if(!editing){return}
   const file=e.dataTransfer.files[0];
   if(file&&(file.name.endsWith(".xlsx")||file.name.endsWith(".xls"))) handleFile(file);
   else if(file) alert("엑셀 파일(.xlsx, .xls)만 지원합니다.");
 });
+
+// ═══ EMAIL ALERT ═══
+// Google Apps Script 웹앱 URL을 여기에 붙여넣으세요 (아래 가이드 참고)
+const ALERT_URL=""; // ← 예: "https://script.google.com/macros/s/xxxxx/exec"
+const ALERT_EMAIL=""; // ← 알림 받을 이메일 (Apps Script에서 설정)
+
+function sendAlert(type,detail){
+  if(!ALERT_URL) return; // URL 미설정시 무시
+  try{
+    fetch(ALERT_URL,{
+      method:"POST",mode:"no-cors",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        type:type, // "edit_attempt" | "edit_success" | "edit_wrong_pw"
+        detail:detail,
+        time:new Date().toLocaleString("ko-KR"),
+        page:location.href
+      })
+    }).catch(()=>{});
+  }catch(e){}
+}
 
 // Default layout: {id, x, y, w, h}
 const DEF_LAYOUT=[
@@ -421,8 +456,13 @@ const EDIT_PW="2211001"; // ← 여기서 비밀번호 변경
 
 function toggleEdit(){
   if(!editing){
+    sendAlert("edit_attempt","편집 모드 진입 시도");
     const pw=prompt("편집 모드 비밀번호를 입력하세요:");
-    if(pw!==EDIT_PW){if(pw!==null)alert("비밀번호가 틀렸습니다.");return}
+    if(pw!==EDIT_PW){
+      if(pw!==null){alert("비밀번호가 틀렸습니다.");sendAlert("edit_wrong_pw","잘못된 비밀번호 입력: "+pw)}
+      return;
+    }
+    sendAlert("edit_success","편집 모드 진입 성공");
   }
   editing=!editing;
   document.body.classList.toggle("editing",editing);
@@ -474,8 +514,8 @@ function renderCal(){
     const dd=String(d).padStart(2,"0");
     const ds=`${mm}/${dd}`;
     const fullKey=`${year}-${ds}`;
-    const has=DSET.has(ds) && year===2026 && month===2; // current data is March 2026 only
-    const sel=tempSelD.has(ds) && year===2026 && month===2;
+    const has=DSET.has(ds);
+    const sel=tempSelD.has(ds);
     const dow=new Date(year,month,d).getDay();
     const cls=["cal-day"];
     if(sel) cls.push("selected");
@@ -500,7 +540,7 @@ function renderCal(){
 
 function tDTemp(ds,y,m){
   // Only toggle dates that exist in current data (March 2026)
-  if(y===2026 && m===2 && DSET.has(ds)){
+  if(DSET.has(ds)){
     if(tempSelD.has(ds)) tempSelD.delete(ds); else tempSelD.add(ds);
     renderCal();
   }
@@ -583,8 +623,8 @@ if(detCalO){
   for(let i=0;i<sd2;i++)h+=`<div class="dcal-day nodata"></div>`;
   for(let dd=1;dd<=dim2;dd++){
     const ds2=`${String(detCalVM+1).padStart(2,"0")}/${String(dd).padStart(2,"0")}`;
-    const has2=dateSet.has(ds2)&&detCalVY===2026&&detCalVM===2;
-    const sel2=tempDFDates.has(ds2)&&detCalVY===2026&&detCalVM===2;
+    const has2=dateSet.has(ds2);
+    const sel2=tempDFDates.has(ds2);
     const cls2=["dcal-day"];if(sel2)cls2.push("sel");if(!has2)cls2.push("nodata");
     const dow2=new Date(detCalVY,detCalVM,dd).getDay();
     const sty2=sel2?"":dow2===0?"color:#c0625a":dow2===6?"color:#4a90a4":"";
