@@ -211,7 +211,7 @@ body.editing .upload-info{display:inline}
 <div class="dashboard" id="captureArea">
   <div id="hiddenBar"></div>
   <div class="grid-stack" id="gs"></div>
-  <div class="footer">엑셀 파일을 화면에 드래그하거나 [엑셀 업로드] 버튼으로 데이터 갱신 · 편집 모드에서 카드 배치/크기 조절 · [캡처] 버튼으로 PNG</div>
+  <div class="footer">엑셀 파일을 화면에 드래그하거나 [엑셀 업로드] 버튼으로 데이터 갱신 · 편집 모드에서 카드 배치/크기 조절 · [캡처] 버튼으로 PNG &nbsp;|&nbsp; v12</div>
 </div>
 
 <script>
@@ -348,6 +348,7 @@ function loadData(data,fileName){
 
 function handleFile(file){
   if(!file) return;
+  if(!editing){alert("편집 모드에서만 엑셀 업로드가 가능합니다.");return}
   const reader=new FileReader();
   reader.onload=function(e){
     try{
