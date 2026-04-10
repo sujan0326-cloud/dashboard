@@ -125,6 +125,10 @@ body.editing .editable-sub[contenteditable=true]{background:#fef9e7;border:1px d
 .trend-bar{width:70%;min-width:6px;border-radius:3px 3px 0 0;transition:height 0.4s}
 .trend-val{font-size:9px;font-weight:700;color:#555;min-height:13px;margin-bottom:1px}
 .trend-date{font-size:7px;color:#999;margin-top:2px;font-weight:500}
+.trend-toggle{display:inline-flex;gap:0;margin-left:auto;border:1px solid #ddd9d3;border-radius:3px;overflow:hidden}
+.trend-toggle button{font-size:9px;padding:2px 8px;border:none;background:#fff;color:#888;cursor:pointer;font-family:inherit;font-weight:600;transition:all 0.15s}
+.trend-toggle button.on{background:#4a6fa5;color:#fff}
+.trend-toggle button:hover:not(.on){background:#f5f3ef}
 
 .rr{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f3f1ed}
 .rr:last-child{border:none}
@@ -155,6 +159,33 @@ body.editing .editable-sub[contenteditable=true]{background:#fef9e7;border:1px d
 .dcal-actions{display:flex;gap:4px;margin-top:6px;padding-top:6px;border-top:1px solid #eee}
 
 .footer{text-align:center;padding:12px 0;color:#aaa;font-size:9px}
+
+/* Yesterday section */
+.section-header{display:flex;align-items:center;gap:10px;padding:14px 18px 8px;max-width:1280px;margin:8px auto 0}
+.section-header .bar{width:4px;height:18px;border-radius:2px}
+.section-header .title{font-size:14px;font-weight:700;color:#2c2c2c}
+.section-header .subtitle{font-size:11px;color:#888;font-weight:500}
+
+.yest-section{background:#f4f8fc;border:1px solid #d8e3f0;border-radius:8px;padding:14px 18px 18px;margin:14px auto 4px;max-width:1248px}
+.yest-section .yest-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.yest-section .yest-head .bar{width:4px;height:18px;background:#4a6fa5;border-radius:2px}
+.yest-section .yest-head .title{font-size:14px;font-weight:700;color:#2c2c2c}
+.yest-section .yest-head .subtitle{font-size:11px;color:#4a6fa5;font-weight:600}
+.yest-date-select{font-size:11px;font-weight:600;color:#4a6fa5;background:#fff;border:1px solid #c8d4e3;border-radius:4px;padding:3px 22px 3px 8px;cursor:pointer;font-family:inherit;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%234a6fa5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
+.yest-date-select:hover{background-color:#f4f8fc}
+.yest-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:12px}
+.yest-kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.yest-kpi-box{background:#fff;border-radius:5px;padding:10px 12px;border:1px solid #dfe7f1}
+.yest-kpi-label{font-size:9px;font-weight:600;color:#aaa;letter-spacing:0.3px}
+.yest-kpi-value{font-size:20px;font-weight:700;line-height:1.1;margin-top:3px;font-family:'DM Sans'}
+.yest-issues{background:#fff;border-radius:5px;padding:12px 14px;border:1px solid #dfe7f1;max-height:160px;overflow-y:auto}
+.yest-issues-title{font-size:11px;font-weight:700;color:#2c2c2c;margin-bottom:6px}
+.yest-issue-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f3f1ed;font-size:11px}
+.yest-issue-row:last-child{border:none}
+.yest-issue-rank{font-size:10px;font-weight:700;color:#888;min-width:14px}
+.yest-issue-name{flex:1;font-weight:500;color:#2c2c2c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.yest-issue-qty{font-weight:700;color:#555;min-width:60px;text-align:right;font-size:11px}
+.yest-empty{text-align:center;color:#aaa;font-size:11px;padding:18px}
 
 /* Drop Zone */
 .drop-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(74,111,165,0.08);z-index:9999;align-items:center;justify-content:center}
@@ -221,10 +252,33 @@ body.editing .upload-info{display:inline}
 </div>
 </div>
 
-<div class="dashboard" id="captureArea">
+<div id="captureArea">
+
+<!-- 어제 신규 이슈 -->
+<div class="yest-section" id="yestSection">
+  <div class="yest-head">
+    <div class="bar"></div>
+    <div class="title">전일 이슈 현황</div>
+    <select class="yest-date-select" id="yestDateSel" onchange="setYestDate(this.value)"></select>
+  </div>
+  <div class="yest-grid">
+    <div class="yest-kpi" id="yestKpi"></div>
+    <div class="yest-issues" id="yestIssues"></div>
+  </div>
+</div>
+
+<!-- 월 누적 현황 헤더 -->
+<div class="section-header">
+  <div class="bar" style="background:#d4915e"></div>
+  <div class="title">누적 현황</div>
+  <div class="subtitle" id="cumDate"></div>
+</div>
+
+<div class="dashboard">
   <div id="hiddenBar"></div>
   <div class="grid-stack" id="gs"></div>
-  <div class="footer">엑셀 파일을 화면에 드래그하거나 [엑셀 업로드] 버튼으로 데이터 갱신 · 편집 모드에서 카드 배치/크기 조절 · [캡처] 버튼으로 PNG &nbsp;|&nbsp; v20</div>
+  <div class="footer">엑셀 파일을 화면에 드래그하거나 [엑셀 업로드] 버튼으로 데이터 갱신 · 편집 모드에서 카드 배치/크기 조절 · [캡처] 버튼으로 PNG &nbsp;|&nbsp; v27</div>
+</div>
 </div>
 
 <script>
@@ -243,6 +297,8 @@ let selD=new Set(DATES),selB=new Set(),editing=false,dF={sup:"전체",brand:"전
 let dFDates=new Set();
 let detCalO=false;
 let hidden=new Set();
+let trendMode="day"; // "day" or "month"
+let yestDate=null; // null = use latest date in data
 let etx=JSON.parse(localStorage.getItem("_t")||"{}");
 let loadedFileName="";
 function gT(k){return etx[k]||{repeat:"동일 이슈 3회 이상 — 시정 요구 대상"}[k]||""}
@@ -345,6 +401,7 @@ function loadData(data,fileName){
   selB.clear();
   dFDates.clear();
   dF={sup:"전체",brand:"전체",type:"전체"};
+  yestDate=null; // reset to latest of new data
   loadedFileName=fileName;
   // Update title
   const monthMatch=fileName.match(/(\d{4})\D*(\d{1,2})월/);
@@ -406,6 +463,33 @@ document.addEventListener("drop",e=>{
 // Google Apps Script 웹앱 URL을 여기에 붙여넣으세요 (아래 가이드 참고)
 const ALERT_URL=""; // ← 예: "https://script.google.com/macros/s/xxxxx/exec"
 const ALERT_EMAIL=""; // ← 알림 받을 이메일 (Apps Script에서 설정)
+
+// ═══ GOOGLE SHEET AUTO-SYNC ═══
+// 구글 시트의 "웹에 게시" CSV URL을 여기에 붙여넣으세요
+// 빈 문자열이면 자동 동기화 비활성화 (수동 엑셀 업로드만 사용)
+const SHEET_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQlKbSzXBoEYS-f8zsi2BC1ZcN64PZddP4NidJ5lw_0FOia9IU94qAhOyJiTkAYfq-uVqvmWu0BGkw6/pub?gid=0&single=true&output=csv"; // ← 예: "https://docs.google.com/spreadsheets/d/e/xxxxx/pub?output=csv"
+
+async function loadFromSheet(){
+  if(!SHEET_URL) return false;
+  try{
+    const url=SHEET_URL+(SHEET_URL.includes("?")?"&":"?")+"_t="+Date.now();
+    const res=await fetch(url);
+    if(!res.ok) throw new Error("Fetch failed: "+res.status);
+    const text=await res.text();
+    const wb=XLSX.read(text,{type:"string"});
+    const data=parseExcel(wb);
+    if(data.length===0){
+      console.warn("[대시보드] 구글 시트에서 데이터를 찾을 수 없습니다");
+      return false;
+    }
+    loadData(data,"Google Sheet (자동 동기화)");
+    console.log("[대시보드] 구글 시트 동기화 완료:",data.length+"건");
+    return true;
+  }catch(err){
+    console.error("[대시보드] 구글 시트 로드 실패:",err);
+    return false;
+  }
+}
 
 function sendAlert(type,detail){
   if(!ALERT_URL) return; // URL 미설정시 무시
@@ -646,7 +730,34 @@ async function doCapture(){const b=document.getElementById("capBtn");b.disabled=
 // ═══ Renderers ═══
 function rKPI(d){const t=d.reduce((s,r)=>s+r.qty,0),ret=d.filter(r=>r.ret).reduce((s,r)=>s+r.qty,0),sups=new Set(d.map(r=>r.sup)).size;return`<div class="ct">${CN.kpi}</div><div class="kpi-grid">${[{l:"총 건수",v:d.length+" <span style='font-size:0.65em;color:#aaa'>건</span>",c:"#4a6fa5"},{l:"총 이슈 수량",v:fmt(t)+" <span style='font-size:0.65em;color:#aaa'>pcs</span>",c:"#2c2c2c"},{l:"반송 수량",v:fmt(ret)+" <span style='font-size:0.65em;color:#aaa'>pcs</span>",c:"#d4915e",s:t?(ret/t*100).toFixed(0)+"%":""},{l:"미입고/취소",v:fmt(t-ret)+" <span style='font-size:0.65em;color:#aaa'>pcs</span>",c:"#b85450",s:t?((t-ret)/t*100).toFixed(0)+"%":""},{l:"이슈 업체",v:sups+" <span style='font-size:0.65em;color:#aaa'>개</span>",c:"#5a8f6e"}].map(k=>`<div class="kpi-box"><div class="kpi-label">${k.l}</div><div class="kpi-value" style="color:${k.c}">${k.v}</div>${k.s?`<div class="kpi-sub">${k.s}</div>`:""}</div>`).join("")}</div>`}
 
-function rTrend(d){const byD={};d.forEach(r=>{byD[r.d]=(byD[r.d]||0)+r.qty});const dates=DATES.filter(x=>selD.has(x));const mx=Math.max(...dates.map(x=>byD[x]||0),1);return`<div class="ct">${CN.trend}</div><div class="trend-c">${dates.map(x=>{const v=byD[x]||0;const h=v?Math.max(v/mx*75,2):0;const int=v/mx;const c=int>0.7?"#4a6fa5":int>0.4?"#7ba3c4":"#b8d1e4";return`<div class="trend-col"><div class="trend-val">${v>0?fmt(v)+" <span style='font-size:0.65em;color:#aaa'>pcs</span>":""}</div><div class="trend-bw"><div class="trend-bar" style="height:${h}px;background:${c}"></div></div><div class="trend-date">${parseInt(x.split("/")[1])}</div></div>`}).join("")}</div>`}
+function setTrendMode(m){trendMode=m;fillCards()}
+function rTrend(d){
+  const titleHtml=`<div class="ct">${trendMode==="day"?"일별 이슈 추이":"월별 이슈 추이"}<div class="trend-toggle"><button class="${trendMode==="day"?"on":""}" onclick="setTrendMode('day')">일</button><button class="${trendMode==="month"?"on":""}" onclick="setTrendMode('month')">월</button></div></div>`;
+  if(trendMode==="day"){
+    const byD={};d.forEach(r=>{byD[r.d]=(byD[r.d]||0)+r.qty});
+    const dates=DATES.filter(x=>selD.has(x));
+    const mx=Math.max(...dates.map(x=>byD[x]||0),1);
+    return titleHtml+`<div class="trend-c">${dates.map(x=>{
+      const v=byD[x]||0;
+      const h=v?Math.max(v/mx*75,2):0;
+      const int=v/mx;
+      const c=int>0.7?"#4a6fa5":int>0.4?"#7ba3c4":"#b8d1e4";
+      return `<div class="trend-col"><div class="trend-val">${v>0?fmt(v)+" <span style='font-size:0.65em;color:#aaa'>pcs</span>":""}</div><div class="trend-bw"><div class="trend-bar" style="height:${h}px;background:${c}"></div></div><div class="trend-date">${parseInt(x.split("/")[1])}</div></div>`;
+    }).join("")}</div>`;
+  } else {
+    // Monthly aggregation
+    const byM={};d.forEach(r=>{const m=r.d.split("/")[0];byM[m]=(byM[m]||0)+r.qty});
+    const months=Object.keys(byM).sort();
+    const mx=Math.max(...months.map(m=>byM[m]),1);
+    return titleHtml+`<div class="trend-c" style="gap:12px;justify-content:center">${months.map(m=>{
+      const v=byM[m];
+      const h=Math.max(v/mx*75,2);
+      const int=v/mx;
+      const c=int>0.7?"#4a6fa5":int>0.4?"#7ba3c4":"#b8d1e4";
+      return `<div class="trend-col" style="max-width:80px"><div class="trend-val" style="font-size:11px">${fmt(v)} <span style='font-size:0.65em;color:#aaa'>pcs</span></div><div class="trend-bw"><div class="trend-bar" style="height:${h}px;background:${c};width:50px;border-radius:4px 4px 0 0"></div></div><div class="trend-date" style="font-size:11px;font-weight:600;color:#555;margin-top:4px">${parseInt(m)}월</div></div>`;
+    }).join("")}</div>`;
+  }
+}
 
 function rBrand(d){const t=d.reduce((s,r)=>s+r.qty,0);const allB=[...new Set(d.map(r=>r.brand))];const byB=allB.map(b=>({b,qty:d.filter(r=>r.brand===b).reduce((s,r)=>s+r.qty,0)})).sort((a,c)=>c.qty-a.qty);const mx=Math.max(...byB.map(x=>x.qty),1);const autoC=["#4a90a4","#c0625a","#d4915e","#6a9f7e","#8b7ec7","#8a9b68","#c47d7d","#7d9ec4","#a4a04a","#7dc4b0"];return`<div class="ct">${CN.brand}</div>`+byB.map((x,i)=>{const c=BC[x.b]||autoC[i%autoC.length];return`<div class="br"><div class="bl"><span class="dot" style="background:${c};margin-right:4px"></span>${x.b}</div><div class="bt"><div class="bf" style="width:${x.qty/mx*100}%;background:${c}"></div></div><div class="bv">${fmt(x.qty)} <span style="font-size:0.65em;color:#aaa">pcs</span></div><div class="bpc">${t?(x.qty/t*100).toFixed(0):0}%</div></div>`}).join("")}
 
@@ -705,8 +816,77 @@ h+=`<select class="ds" onchange="dF.brand=this.value;fillCards()"><option value=
 
 const REN={kpi:rKPI,trend:rTrend,brand:rBrand,issue:rIssue,supplier:rSupplier,repeat:rRepeat,detail:rDetail};
 
+function setYestDate(d){yestDate=d;renderYesterday()}
+
+function renderYesterday(){
+  if(!RAW.length){
+    document.getElementById("yestSection").style.display="none";
+    return;
+  }
+  document.getElementById("yestSection").style.display="block";
+  
+  // Use selected date or default to latest
+  const selDate=(yestDate&&DSET.has(yestDate))?yestDate:DATES[DATES.length-1];
+  if(!yestDate) yestDate=selDate;
+  const yd=RAW.filter(r=>r.d===selDate);
+  
+  // Populate date selector (newest first)
+  const sel=document.getElementById("yestDateSel");
+  const datesDesc=[...DATES].reverse();
+  sel.innerHTML=datesDesc.map(d=>{
+    const [m,dd]=d.split("/");
+    return `<option value="${d}"${d===selDate?" selected":""}>${parseInt(m)}/${parseInt(dd)} 입고분</option>`;
+  }).join("");
+  
+  // KPIs
+  const t=yd.reduce((s,r)=>s+r.qty,0);
+  const ret=yd.filter(r=>r.ret).reduce((s,r)=>s+r.qty,0);
+  const sups=new Set(yd.map(r=>r.sup)).size;
+  const kpis=[
+    {l:"건수",v:yd.length+" <span style='font-size:0.65em;color:#aaa'>건</span>",c:"#4a6fa5"},
+    {l:"이슈 수량",v:fmt(t)+" <span style='font-size:0.65em;color:#aaa'>pcs</span>",c:"#2c2c2c"},
+    {l:"반송",v:fmt(ret)+" <span style='font-size:0.65em;color:#aaa'>pcs</span>",c:"#d4915e"},
+    {l:"이슈 업체",v:sups+" <span style='font-size:0.65em;color:#aaa'>개</span>",c:"#5a8f6e"}
+  ];
+  document.getElementById("yestKpi").innerHTML=kpis.map(k=>
+    `<div class="yest-kpi-box"><div class="yest-kpi-label">${k.l}</div><div class="yest-kpi-value" style="color:${k.c}">${k.v}</div></div>`
+  ).join("");
+  
+  // Top issues by supplier
+  const supMap={};
+  yd.forEach(r=>{
+    if(!supMap[r.sup]) supMap[r.sup]={sup:r.sup,q:0,types:new Set(),brands:new Set()};
+    supMap[r.sup].q+=r.qty;
+    supMap[r.sup].types.add(r.type);
+    supMap[r.sup].brands.add(r.brand);
+  });
+  const topIssues=Object.values(supMap).sort((a,b)=>b.q-a.q).slice(0,6);
+  let issuesHtml=`<div class="yest-issues-title">주요 이슈 (TOP ${topIssues.length})</div>`;
+  if(topIssues.length===0){
+    issuesHtml+=`<div class="yest-empty">전일 이슈 없음</div>`;
+  } else {
+    issuesHtml+=topIssues.map((s,i)=>{
+      const tList=[...s.types].join(", ");
+      const bList=[...s.brands].join("/");
+      return `<div class="yest-issue-row"><div class="yest-issue-rank">${i+1}.</div><div class="yest-issue-name">${s.sup} <span style="color:#888;font-size:10px">[${bList}] ${tList}</span></div><div class="yest-issue-qty">${fmt(s.q)} <span style="font-size:0.65em;color:#aaa">pcs</span></div></div>`;
+    }).join("");
+  }
+  document.getElementById("yestIssues").innerHTML=issuesHtml;
+}
+
 function fillCards(){
+  renderYesterday();
   const d=getF();
+  // Update cumulative date range based on filter
+  const fdates=[...selD].sort();
+  if(fdates.length>0){
+    const first=fdates[0],last=fdates[fdates.length-1];
+    const [fm,fd2]=first.split("/"),[lm,ld]=last.split("/");
+    const rangeStr=first===last?(parseInt(fm)+"/"+parseInt(fd2)):(parseInt(fm)+"/"+parseInt(fd2)+" ~ "+parseInt(lm)+"/"+parseInt(ld));
+    document.getElementById("cumDate").textContent=rangeStr+" ("+fdates.length+"일)";
+  } else {
+    document.getElementById("cumDate").textContent="선택된 날짜 없음";
+  }
   document.getElementById("fInfo").innerHTML=`${d.length} <span style="font-size:0.8em;color:#aaa">건</span> · ${fmt(d.reduce((s,r)=>s+r.qty,0))} <span style="font-size:0.8em;color:#aaa">pcs</span>`;
   Object.keys(REN).forEach(id=>{
     const el=document.getElementById("card-"+id);
@@ -717,7 +897,7 @@ function fillCards(){
 }
 
 document.addEventListener("click",e=>{});
-initB();initGrid();
+initB();initGrid();loadFromSheet();
 </script>
 </body>
 </html>
