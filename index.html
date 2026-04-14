@@ -267,15 +267,30 @@ body.editing .upload-info{display:inline}
   </div>
 </div>
 
-<div class="dashboard">
-  <div style="display:flex;align-items:center;gap:10px;padding:10px 4px 14px">
-    <div style="width:4px;height:18px;border-radius:2px;background:#d4915e"></div>
-    <div style="font-size:14px;font-weight:700;color:#2c2c2c">누적 현황</div>
-    <div style="font-size:11px;color:#888;font-weight:500" id="cumDate"></div>
+<!-- 상세 이슈 목록 (전일과 누적 사이) -->
+<div style="max-width:1280px;margin:14px auto 4px;padding:0 4px">
+  <div id="detailWrapper" style="background:#fff;border:1px solid #ddd9d3;border-radius:6px;overflow:hidden">
+    <div id="detailToggle" onclick="toggleDetail()" style="display:flex;align-items:center;gap:10px;padding:12px 18px;cursor:pointer;user-select:none;border-bottom:1px solid #f0ede8">
+      <div style="width:4px;height:18px;border-radius:2px;background:#5a8f6e"></div>
+      <div style="font-size:14px;font-weight:700;color:#2c2c2c">상세 이슈 목록</div>
+      <div style="font-size:11px;color:#888;font-weight:500" id="detailCount"></div>
+      <div style="margin-left:auto;font-size:14px;color:#888;transition:transform 0.2s" id="detailArrow">▼</div>
+    </div>
+    <div id="detailTableContainer" style="padding:14px 18px"></div>
   </div>
+</div>
+
+<!-- 누적 현황 헤더 -->
+<div style="max-width:1280px;margin:14px auto 0;padding:0 4px;display:flex;align-items:center;gap:10px">
+  <div style="width:4px;height:18px;border-radius:2px;background:#d4915e"></div>
+  <div style="font-size:14px;font-weight:700;color:#2c2c2c">누적 현황</div>
+  <div style="font-size:11px;color:#888;font-weight:500" id="cumDate"></div>
+</div>
+
+<div class="dashboard">
   <div id="hiddenBar"></div>
   <div class="grid-stack" id="gs"></div>
-  <div class="footer">엑셀 파일을 화면에 드래그하거나 [엑셀 업로드] 버튼으로 데이터 갱신 · 편집 모드에서 카드 배치/크기 조절 · [캡처] 버튼으로 PNG &nbsp;|&nbsp; v28</div>
+  <div class="footer">엑셀 파일을 화면에 드래그하거나 [엑셀 업로드] 버튼으로 데이터 갱신 · 편집 모드에서 카드 배치/크기 조절 · [캡처] 버튼으로 PNG &nbsp;|&nbsp; v30</div>
 </div>
 </div>
 
@@ -288,7 +303,7 @@ let BRANDS=[...new Set(RAW.map(r=>r.brand))].sort();
 const BC={K2:"#4a90a4",EIDER:"#c0625a",DYNAFIT:"#d4915e","WIDE ANGLE":"#6a9f7e",NORDISK:"#8b7ec7",PIRETTI:"#8a9b68"};
 const TYPES=["QC불량","미입고","예약오류","패킹오류","박스바코드 불량","RFID 불량","사이즈교차","통관지연","생산지연","수량오류","패킹 미등록"];
 const TC={QC불량:"#e8928d",미입고:"#95a5a6",예약오류:"#e8c18d",패킹오류:"#a8a0d6","박스바코드 불량":"#7db8d4","RFID 불량":"#7db5b5",사이즈교차:"#b5a8d6",통관지연:"#d4c47d",생산지연:"#b5c4c4",수량오류:"#d4a07d","패킹 미등록":"#7dc4b0"};
-const CN={kpi:"핵심 지표 요약",trend:"일별 이슈 추이",brand:"브랜드별 이슈 수량",issue:"이슈 유형별 현황",supplier:"이슈업체",repeat:"반복 이슈 업체",detail:"상세 이슈 목록"};
+const CN={kpi:"핵심 지표 요약",trend:"일별 이슈 추이",brand:"브랜드별 이슈 수량",issue:"이슈 유형별 현황",supplier:"이슈업체",repeat:"반복 이슈 업체",detail:""};
 const TCD={QC불량:"#b04540",미입고:"#4a5a5e",예약오류:"#a07838",패킹오류:"#5a48a0","박스바코드 불량":"#2a6e90","RFID 불량":"#2a7070",사이즈교차:"#6a50a8",통관지연:"#8a7820",생산지연:"#606e6e",수량오류:"#904e20","패킹 미등록":"#2a7a60"};
 const fmt=n=>n.toLocaleString();
 let selD=new Set(DATES),selB=new Set(),editing=false,dF={sup:"전체",brand:"전체",type:"전체"};
@@ -513,15 +528,17 @@ const DEF_LAYOUT=[
   {id:"issue",x:6,y:5,w:6,h:4},
   {id:"supplier",x:0,y:9,w:6,h:5},
   {id:"repeat",x:6,y:9,w:6,h:5},
-  {id:"detail",x:0,y:14,w:12,h:6},
 ];
 
 let grid=null;
 
 function initGrid(){
-  const saved=JSON.parse(localStorage.getItem("_gl")||"null");
+  let saved=JSON.parse(localStorage.getItem("_gl")||"null");
+  // Remove detail from saved layout (moved to separate container)
+  if(saved) saved=saved.filter(it=>it.id!=="detail");
   const layout=saved||DEF_LAYOUT;
   hidden=new Set(JSON.parse(localStorage.getItem("_gh")||"[]"));
+  hidden.delete("detail"); // detail is no longer in grid
 
   grid=GridStack.init({
     column:12,cellHeight:40,margin:6,
@@ -872,6 +889,18 @@ function renderYesterday(){
   document.getElementById("yestIssues").innerHTML=issuesHtml;
 }
 
+let detailOpen=localStorage.getItem("_dto")!=="0"; // default open
+function toggleDetail(){
+  detailOpen=!detailOpen;
+  localStorage.setItem("_dto",detailOpen?"1":"0");
+  document.getElementById("detailTableContainer").style.display=detailOpen?"block":"none";
+  document.getElementById("detailArrow").style.transform=detailOpen?"rotate(0deg)":"rotate(-90deg)";
+}
+function applyDetailOpen(){
+  document.getElementById("detailTableContainer").style.display=detailOpen?"block":"none";
+  document.getElementById("detailArrow").style.transform=detailOpen?"rotate(0deg)":"rotate(-90deg)";
+}
+
 function fillCards(){
   renderYesterday();
   const d=getF();
@@ -886,7 +915,13 @@ function fillCards(){
     document.getElementById("cumDate").textContent="선택된 날짜 없음";
   }
   document.getElementById("fInfo").innerHTML=`${d.length} <span style="font-size:0.8em;color:#aaa">건</span> · ${fmt(d.reduce((s,r)=>s+r.qty,0))} <span style="font-size:0.8em;color:#aaa">pcs</span>`;
+  // Render detail table in its own container
+  const detailEl=document.getElementById("detailTableContainer");
+  if(detailEl) detailEl.innerHTML=rDetail(d);
+  document.getElementById("detailCount").textContent=d.length+"건";
+  applyDetailOpen();
   Object.keys(REN).forEach(id=>{
+    if(id==="detail")return;
     const el=document.getElementById("card-"+id);
     if(!el)return;
     const xBtn=el.querySelector(".card-x");
