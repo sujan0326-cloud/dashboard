@@ -9,7 +9,11 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gridstack.js/10.3.1/gridstack.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gridstack.js/10.3.1/gridstack-all.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@font-face{font-family:'Pretendard';src:url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Pretendard';src:url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Medium.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'Pretendard';src:url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-SemiBold.woff2') format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:'Pretendard';src:url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Bold.woff2') format('woff2');font-weight:700;font-display:swap}
 *{margin:0;padding:0;box-sizing:border-box}
 
 /* ═══════════ THEME TOKENS ═══════════
@@ -27,7 +31,7 @@ body{
   /* density */
   --fs:13px; --fs-sm:11px; --fs-xs:10px;
   --pad-card:16px 20px; --kpi-v:28px; --row-pad:7px; --cell-pad:6px;
-  font-family:'IBM Plex Sans KR',sans-serif;
+  font-family:'Pretendard','IBM Plex Sans KR',sans-serif;
   background:var(--bg); color:var(--text);
   -webkit-font-smoothing:antialiased; font-size:var(--fs);
   font-feature-settings:"tnum";
@@ -87,6 +91,8 @@ body.mode-monitor .mode-seg button.on::before{content:"";width:5px;height:5px;bo
 .cal-month:hover{background:var(--accent-soft);color:var(--accent)}
 .cal-month.active{background:var(--accent);color:#fff;font-weight:600}
 .cal-month.has-data-month{color:var(--text);font-weight:500}
+.cal-month.month-sel{background:var(--warn);color:#fff;font-weight:600}
+.cal-month.month-sel.active{background:var(--accent)}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
 .cal-dow{font-size:9px;font-weight:600;color:var(--muted);padding:4px 0}
 .cal-day{font-size:11px;padding:6px 2px;border-radius:4px;cursor:pointer;transition:all 0.12s;position:relative}
@@ -123,9 +129,9 @@ body.mode-monitor .mode-seg button.on::before{content:"";width:5px;height:5px;bo
 .yest-date-select{font-size:11px;font-weight:600;color:var(--accent);background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:3px 22px 3px 8px;cursor:pointer;font-family:inherit;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
 .yest-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:12px}
 .yest-kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.yest-kpi-box{background:var(--surface);border-radius:6px;padding:10px 12px;border:1px solid var(--border2);box-shadow:var(--shadow)}
-.yest-kpi-label{font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:600;color:var(--muted);letter-spacing:0.8px;text-transform:uppercase}
-.yest-kpi-value{font-size:calc(var(--kpi-v) - 7px);font-weight:700;line-height:1.1;margin-top:3px}
+.yest-kpi-box{background:var(--surface);border-radius:6px;padding:12px 14px;border:1px solid var(--border2);box-shadow:var(--shadow)}
+.yest-kpi-label{font-size:16px;font-weight:600;color:var(--text-sub);letter-spacing:0.2px}
+.yest-kpi-value{font-size:calc(var(--kpi-v) - 2px);font-weight:700;line-height:1.1;margin-top:5px}
 .yest-issues{background:var(--surface);border-radius:6px;padding:12px 14px;border:1px solid var(--border2);max-height:160px;overflow-y:auto;box-shadow:var(--shadow)}
 .yest-issues-title{font-size:11px;font-weight:700;color:var(--text);margin-bottom:6px}
 .yest-issue-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border2);font-size:11px}
@@ -324,7 +330,7 @@ body.editing .upload-info{display:inline}
 <div class="dashboard">
   <div id="hiddenBar"></div>
   <div class="grid-stack" id="gs"></div>
-  <div class="footer">엑셀 드래그 또는 [엑셀 업로드]로 데이터 갱신 · 편집 모드에서 카드 배치/크기 조절 · [보고↔모니터링] 보기 전환 · [캡처] PNG 저장 | v35</div>
+  <div class="footer">엑셀 드래그 또는 [엑셀 업로드]로 데이터 갱신 · 편집 모드에서 카드 배치/크기 조절 · [보고↔모니터링] 보기 전환 · [캡처] PNG 저장 | v36</div>
 </div>
 </div>
 
@@ -732,6 +738,17 @@ function fmtSelDates(dateSet){
 }
 
 function calSetM(m){calViewM=m;renderCal()}
+// 월 전체 선택/해제 토글 (데이터 있는 날짜만 대상)
+function calToggleMonth(m){
+  calViewM=m;
+  const mm=String(m+1).padStart(2,"0");
+  const monthDates=DATES.filter(d=>d.split("/")[0]===mm);
+  if(monthDates.length===0){renderCal();return}
+  const allSel=monthDates.every(d=>tempSelD.has(d));
+  if(allSel) monthDates.forEach(d=>tempSelD.delete(d));
+  else monthDates.forEach(d=>tempSelD.add(d));
+  renderCal();
+}
 
 function renderCal(){
   const year=calViewY, month=calViewM;
@@ -747,17 +764,23 @@ function renderCal(){
   h+=`<button class="cal-nav-btn" onclick="calNextY()">»</button>`;
   h+=`</div>`;
 
-  // Month bar
+  // Month bar — 클릭 시 해당 월 전체 선택/해제 토글
   h+=`<div class="cal-months">`;
   for(let m=0;m<12;m++){
     const isActive=m===month;
     const hasData=dataMonths.has(m);
+    const mm=String(m+1).padStart(2,"0");
+    const monthDates=DATES.filter(d=>d.split("/")[0]===mm);
+    const allSel=monthDates.length>0&&monthDates.every(d=>tempSelD.has(d));
     const cls=["cal-month"];
     if(isActive) cls.push("active");
     if(hasData&&!isActive) cls.push("has-data-month");
-    h+=`<button class="${cls.join(" ")}" onclick="calSetM(${m})">${m+1}월</button>`;
+    if(allSel) cls.push("month-sel");
+    const tip=hasData?`${m+1}월 전체 ${allSel?"해제":"선택"}`:`${m+1}월`;
+    h+=`<button class="${cls.join(" ")}" title="${tip}" onclick="calToggleMonth(${m})">${m+1}월${allSel?" ✓":""}</button>`;
   }
   h+=`</div>`;
+  h+=`<div style="font-size:9px;color:var(--muted);margin:-4px 0 8px;padding-left:1px">월 버튼 클릭 = 그 달 전체 선택 · 날짜 클릭 = 개별 선택</div>`;
 
   // Day grid
   h+=`<div class="cal-grid">`;
@@ -887,6 +910,16 @@ let tempDFDates=new Set();
 
 function tDCal(ds){if(tempDFDates.has(ds))tempDFDates.delete(ds);else tempDFDates.add(ds);fillCards()}
 function aDCal(){tempDFDates.clear();fillCards()}
+// 상세 미니캘린더: 현재 보고 있는 달의 데이터 날짜 전체 토글
+function detCalMonth(){
+  const mm=String(detCalVM+1).padStart(2,"0");
+  const monthDates=DATES.filter(d=>d.split("/")[0]===mm);
+  if(monthDates.length===0){fillCards();return}
+  const allSel=monthDates.every(d=>tempDFDates.has(d));
+  if(allSel) monthDates.forEach(d=>tempDFDates.delete(d));
+  else monthDates.forEach(d=>tempDFDates.add(d));
+  fillCards();
+}
 function applyDetCal(){dFDates=new Set(tempDFDates);detCalO=false;fillCards()}
 function tgDetCal(){if(detCalO)return;detCalO=true;tempDFDates=new Set(dFDates);fillCards()}
 function detCalPM(){detCalVM--;if(detCalVM<0){detCalVM=11;detCalVY--}fillCards()}
@@ -924,10 +957,10 @@ if(detCalO){
     h+=`<div class="${cls2.join(" ")}" style="${sty2}" onclick="tDCal('${ds2}')">${dd}</div>`;
   }
   const tCnt=tempDFDates.size;const detInfo=tCnt===0?"전체":fmtDateRange(tempDFDates);
-  h+=`</div><div class="dcal-actions"><button class="cbtn p" style="font-size:9px;padding:3px 8px" onclick="aDCal()">전체</button><span class="cal-sel-info">${detInfo}</span><button class="cbtn" style="font-size:9px;padding:3px 8px" onclick="detCalO=false;fillCards()">취소</button><button class="cal-apply" style="font-size:10px;padding:4px 12px" onclick="applyDetCal()">조회</button></div></div>`;
+  h+=`</div><div class="dcal-actions"><button class="cbtn" style="font-size:9px;padding:3px 8px" onclick="detCalMonth()">${mn2[detCalVM]} 전체</button><button class="cbtn p" style="font-size:9px;padding:3px 8px" onclick="aDCal()">해제</button><span class="cal-sel-info">${detInfo}</span><button class="cbtn" style="font-size:9px;padding:3px 8px" onclick="detCalO=false;fillCards()">취소</button><button class="cal-apply" style="font-size:10px;padding:4px 12px" onclick="applyDetCal()">조회</button></div></div>`;
 }
 h+=`</div>`;
-h+=`<select class="ds" onchange="dF.brand=this.value;fillCards()"><option value="전체">브랜드</option>${brands.map(x=>`<option${dF.brand===x?" selected":""}>${x}</option>`).join("")}</select>`;h+=`<select class="ds" onchange="dF.sup=this.value;fillCards()"><option value="전체">업체</option>${sups.map(x=>`<option value="${x}"${dF.sup===x?" selected":""}>${x}</option>`).join("")}</select>`;h+=`<select class="ds" onchange="dF.type=this.value;fillCards()"><option value="전체">이슈</option>${types.map(x=>`<option${dF.type===x?" selected":""}>${x}</option>`).join("")}</select>`;if(hf)h+=`<button class="bsm" onclick="dF={sup:'전체',brand:'전체',type:'전체'};dFDates.clear();detCalO=false;fillCards()">초기화</button>`;h+=`</div><div style="overflow-y:auto;max-height:calc(100% - 70px);border:1px solid #eee;border-radius:4px"><table class="dt"><thead><tr><th>날짜</th><th>브랜드</th><th>업체</th><th>복종</th><th>품번</th><th>구분</th><th class="r">수량</th><th>이슈</th></tr></thead><tbody>`;fd.slice(0,80).forEach((r,i)=>{h+=`<tr style="background:${i%2?"var(--zebra)":""}"><td>${r.d}</td><td><span class="dot" style="background:${getBC(r.brand)};margin-right:3px"></span>${r.brand}</td><td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.sup}</td><td>${r.cat}</td><td style="font-family:'IBM Plex Mono',monospace;font-size:0.9em;color:var(--text-sub);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.product||'<span style=\"color:var(--muted)\">—</span>'}</td><td><span class="tg ${r.ret?"tg-ret":"tg-mis"}" style="font-weight:500">${r.ret?"반송":"미입고"}</span></td><td class="r" style="font-weight:600">${fmt(r.qty)} <span style="font-size:0.65em;color:var(--muted)">pcs</span></td><td><span class="tg" style="background:${getTC(r.type)}20;color:${getTCD(r.type)};font-weight:500">${r.type}</span></td></tr>`});return h+"</tbody></table></div>"}
+h+=`<select class="ds" onchange="dF.brand=this.value;fillCards()"><option value="전체">브랜드</option>${brands.map(x=>`<option value="${x}"${dF.brand===x?" selected":""}>${x}</option>`).join("")}</select>`;h+=`<select class="ds" onchange="dF.sup=this.value;fillCards()"><option value="전체">업체</option>${sups.map(x=>`<option value="${x}"${dF.sup===x?" selected":""}>${x}</option>`).join("")}</select>`;h+=`<select class="ds" onchange="dF.type=this.value;fillCards()"><option value="전체">이슈</option>${types.map(x=>`<option value="${x}"${dF.type===x?" selected":""}>${x}</option>`).join("")}</select>`;if(hf)h+=`<button class="bsm" onclick="dF={sup:'전체',brand:'전체',type:'전체'};dFDates.clear();detCalO=false;fillCards()">초기화</button>`;h+=`</div><div style="overflow-y:auto;max-height:calc(100% - 70px);border:1px solid #eee;border-radius:4px"><table class="dt"><thead><tr><th>날짜</th><th>브랜드</th><th>업체</th><th>복종</th><th>품번</th><th>구분</th><th class="r">수량</th><th>이슈</th></tr></thead><tbody>`;fd.slice(0,80).forEach((r,i)=>{h+=`<tr style="background:${i%2?"var(--zebra)":""}"><td>${r.d}</td><td><span class="dot" style="background:${getBC(r.brand)};margin-right:3px"></span>${r.brand}</td><td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.sup}</td><td>${r.cat}</td><td style="font-family:'IBM Plex Mono',monospace;font-size:0.9em;color:var(--text-sub);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.product||'<span style=\"color:var(--muted)\">—</span>'}</td><td><span class="tg ${r.ret?"tg-ret":"tg-mis"}" style="font-weight:500">${r.ret?"반송":"미입고"}</span></td><td class="r" style="font-weight:600">${fmt(r.qty)} <span style="font-size:0.65em;color:var(--muted)">pcs</span></td><td><span class="tg" style="background:${getTC(r.type)}20;color:${getTCD(r.type)};font-weight:500">${r.type}</span></td></tr>`});return h+"</tbody></table></div>"}
 
 const REN={kpi:rKPI,trend:rTrend,brand:rBrand,issue:rIssue,supplier:rSupplier,repeat:rRepeat,detail:rDetail};
 
