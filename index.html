@@ -252,19 +252,22 @@ body.editing .upload-btn{display:inline-flex}
 body.editing .upload-info{display:inline}
 .upload-file{font-size:10px;color:var(--accent);font-weight:600}
 
-/* v38: 전일 상세 카드 그룹 + 누적 접기 */
-.yest-cards{margin-top:14px;display:none;grid-template-columns:repeat(2,1fr);gap:12px}
-.yest-cards.open{display:grid}
-.yest-cards .gs-item-content{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 12px;box-shadow:var(--shadow);min-height:260px;overflow:auto}
-.yest-cards .gs-item-content .dt{min-width:600px}
-.yest-cards .gs-item-content th,.yest-cards .gs-item-content td{white-space:nowrap}
-.yest-cards .yest-card-full{grid-column:1/-1}
-.yest-toggle-btn{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding:8px 14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;cursor:pointer;user-select:none;box-shadow:var(--shadow)}
-.yest-toggle-btn:hover{background:var(--accent-soft)}
-.yest-toggle-btn .lbl{font-size:12px;font-weight:700;color:var(--text)}
-.yest-toggle-btn .cnt{font-size:11px;color:var(--muted);margin-left:8px}
-.yest-toggle-btn .arrow{font-size:11px;color:var(--muted);transition:transform 0.15s}
-.yest-toggle-btn.open .arrow{transform:rotate(180deg)}
+/* v42: 전일 이슈 아래에 상세 목록 추가 (원본 KPI+TOP 유지) + 누적 접기 */
+.yest-detail{margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;box-shadow:var(--shadow);overflow:hidden}
+.yest-detail-head{padding:8px 14px;border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:6px}
+.yest-detail-title{font-size:12px;font-weight:700;color:var(--text)}
+.yest-detail-cnt{font-size:11px;color:var(--muted);font-weight:normal}
+.yest-detail-body{max-height:400px;overflow:auto}
+.yest-detail-body table{width:100%;border-collapse:collapse;font-size:11px}
+.yest-detail-body thead th{position:sticky;top:0;background:var(--surface2);text-align:left;padding:6px 10px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap}
+.yest-detail-body th.r{text-align:right}
+.yest-detail-body tbody td{padding:5px 10px;border-bottom:1px solid var(--border2);white-space:nowrap}
+.yest-detail-body tbody td.r{text-align:right;font-weight:600}
+.yest-detail-body tbody tr:nth-child(even){background:var(--zebra)}
+.yest-detail-body tbody tr:hover{background:var(--accent-soft)}
+.yest-detail-body .prod-cell{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--text-sub)}
+.yest-detail-body .sup-cell{max-width:120px;overflow:hidden;text-overflow:ellipsis}
+.yest-detail-empty{padding:20px;text-align:center;color:var(--muted);font-size:11px}
 
 /* 누적 현황 접기 */
 .sec-head-collapsible{cursor:pointer;user-select:none}
@@ -340,15 +343,12 @@ body.editing .upload-info{display:inline}
     <div class="yest-kpi" id="yestKpi"></div>
     <div class="yest-issues" id="yestIssues"></div>
   </div>
-  <div class="yest-toggle-btn" id="yestToggleBtn" onclick="toggleYestCards()">
-    <div><span class="lbl">전일 상세 카드</span><span class="cnt" id="yestCardsCnt"></span></div>
-    <div class="arrow">▼</div>
-  </div>
-  <div class="yest-cards" id="yestCards">
-    <div class="gs-item-content" id="yestCardBrand"></div>
-    <div class="gs-item-content" id="yestCardIssue"></div>
-    <div class="gs-item-content yest-card-full" id="yestCardSupplier"></div>
-    <div class="gs-item-content yest-card-full" id="yestCardDetail"></div>
+  <div class="yest-detail" id="yestDetail">
+    <div class="yest-detail-head">
+      <span class="yest-detail-title">상세 이슈 목록</span>
+      <span class="yest-detail-cnt" id="yestDetailCnt"></span>
+    </div>
+    <div class="yest-detail-body" id="yestDetailBody"></div>
   </div>
 </div>
 
@@ -363,7 +363,7 @@ body.editing .upload-info{display:inline}
 <div class="dashboard collapsed" id="cumDashboard">
   <div id="hiddenBar"></div>
   <div class="grid-stack" id="gs"></div>
-  <div class="footer">엑셀 드래그 또는 [엑셀 업로드]로 데이터 갱신 · 편집 모드에서 카드 배치/크기 조절 · [보고↔모니터링] 보기 전환 · [캡처] PNG 저장 | v39</div>
+  <div class="footer">엑셀 드래그 또는 [엑셀 업로드]로 데이터 갱신 · 편집 모드에서 카드 배치/크기 조절 · [보고↔모니터링] 보기 전환 · [캡처] PNG 저장 | v42</div>
 </div>
 </div>
 
@@ -1054,32 +1054,48 @@ function renderYesterday(){
   }
   document.getElementById("yestIssues").innerHTML=issuesHtml;
   
-  // 전일 상세 카드 렌더
-  renderYestCards(yd);
-  document.getElementById("yestCardsCnt").textContent=`(${yd.length}건)`;
+  // 상세 이슈 목록 렌더 (아래 새 카드)
+  renderYestDetail(yd);
 }
 
-function renderYestCards(yd){
-  if(!yd || yd.length===0){
-    const empty=`<div style="padding:16px;text-align:center;color:var(--muted);font-size:11px">데이터 없음</div>`;
-    document.getElementById("yestCardBrand").innerHTML=empty;
-    document.getElementById("yestCardIssue").innerHTML=empty;
-    document.getElementById("yestCardSupplier").innerHTML=empty;
-    document.getElementById("yestCardDetail").innerHTML=empty;
+// 브랜드 정렬 순서 (K2 > EIDER > WIDE ANGLE > DYNAFIT > NORDISK > 기타)
+const BRAND_SORT_ORDER=["K2","EIDER","WIDE ANGLE","DYNAFIT","NORDISK"];
+function brandSortKey(b){const i=BRAND_SORT_ORDER.indexOf(b);return i===-1?999:i}
+
+function renderYestDetail(yd){
+  const body=document.getElementById("yestDetailBody");
+  const cnt=document.getElementById("yestDetailCnt");
+  if(!yd||yd.length===0){
+    body.innerHTML=`<div class="yest-detail-empty">전일 상세 이슈 없음</div>`;
+    cnt.textContent="";
     return;
   }
-  // 기존 렌더 함수 재사용 (dFDates/dF 는 상세목록용, 전일에도 유효)
-  document.getElementById("yestCardBrand").innerHTML=rBrand(yd);
-  document.getElementById("yestCardIssue").innerHTML=rIssue(yd);
-  document.getElementById("yestCardSupplier").innerHTML=rSupplier(yd);
-  document.getElementById("yestCardDetail").innerHTML=rDetail(yd);
-}
-
-function toggleYestCards(){
-  const btn=document.getElementById("yestToggleBtn");
-  const cards=document.getElementById("yestCards");
-  btn.classList.toggle("open");
-  cards.classList.toggle("open");
+  cnt.textContent=`(${yd.length}건)`;
+  // 브랜드 순 → 수량 내림차순으로 정렬
+  const sorted=[...yd].sort((a,b)=>{
+    const ka=brandSortKey(a.brand),kb=brandSortKey(b.brand);
+    if(ka!==kb) return ka-kb;
+    return b.qty-a.qty;
+  });
+  const rows=sorted.map(r=>{
+    const bColor=getBC(r.brand);
+    const retTag=r.ret?`<span class="tg tg-ret" style="font-weight:500">반송</span>`:`<span class="tg tg-mis" style="font-weight:500">미입고</span>`;
+    return `<tr>
+      <td><span class="dot" style="background:${bColor};margin-right:3px"></span>${r.brand}</td>
+      <td class="sup-cell">${r.sup}</td>
+      <td>${r.cat}</td>
+      <td class="prod-cell">${r.product||'<span style="color:var(--muted)">—</span>'}</td>
+      <td>${retTag}</td>
+      <td class="r">${fmt(r.qty)} <span style="font-size:0.65em;color:var(--muted)">pcs</span></td>
+      <td><span class="tg" style="background:${getTC(r.type)}20;color:${getTCD(r.type)};font-weight:500">${r.type}</span></td>
+    </tr>`;
+  }).join("");
+  body.innerHTML=`<table>
+    <thead><tr>
+      <th>브랜드</th><th>업체</th><th>복종</th><th>품번</th><th>구분</th><th class="r">수량</th><th>이슈</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
 }
 
 function toggleCumulative(){
