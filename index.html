@@ -251,7 +251,29 @@ body.editing .upload-btn{display:inline-flex}
 .upload-info{font-size:10px;color:var(--muted);display:none}
 body.editing .upload-info{display:inline}
 .upload-file{font-size:10px;color:var(--accent);font-weight:600}
+
+/* v38: 전일 상세 카드 그룹 + 누적 접기 */
+.yest-cards{margin-top:14px;display:none;grid-template-columns:repeat(2,1fr);gap:12px}
+.yest-cards.open{display:grid}
+.yest-cards .gs-item-content{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 12px;box-shadow:var(--shadow);min-height:260px;overflow:auto}
+.yest-cards .gs-item-content .dt{min-width:600px}
+.yest-cards .gs-item-content th,.yest-cards .gs-item-content td{white-space:nowrap}
+.yest-cards .yest-card-full{grid-column:1/-1}
+.yest-toggle-btn{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding:8px 14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;cursor:pointer;user-select:none;box-shadow:var(--shadow)}
+.yest-toggle-btn:hover{background:var(--accent-soft)}
+.yest-toggle-btn .lbl{font-size:12px;font-weight:700;color:var(--text)}
+.yest-toggle-btn .cnt{font-size:11px;color:var(--muted);margin-left:8px}
+.yest-toggle-btn .arrow{font-size:11px;color:var(--muted);transition:transform 0.15s}
+.yest-toggle-btn.open .arrow{transform:rotate(180deg)}
+
+/* 누적 현황 접기 */
+.sec-head-collapsible{cursor:pointer;user-select:none}
+.sec-head-collapsible:hover .title{color:var(--accent)}
+.sec-head .collapse-toggle{margin-left:auto;font-size:11px;color:var(--muted);transition:transform 0.15s;padding:0 6px}
+.sec-head.collapsed .collapse-toggle{transform:rotate(-90deg)}
+.dashboard.collapsed{display:none}
 </style>
+
 </head>
 <body>
 
@@ -318,19 +340,30 @@ body.editing .upload-info{display:inline}
     <div class="yest-kpi" id="yestKpi"></div>
     <div class="yest-issues" id="yestIssues"></div>
   </div>
+  <div class="yest-toggle-btn" id="yestToggleBtn" onclick="toggleYestCards()">
+    <div><span class="lbl">전일 상세 카드</span><span class="cnt" id="yestCardsCnt"></span></div>
+    <div class="arrow">▼</div>
+  </div>
+  <div class="yest-cards" id="yestCards">
+    <div class="gs-item-content" id="yestCardBrand"></div>
+    <div class="gs-item-content" id="yestCardIssue"></div>
+    <div class="gs-item-content yest-card-full" id="yestCardSupplier"></div>
+    <div class="gs-item-content yest-card-full" id="yestCardDetail"></div>
+  </div>
 </div>
 
 <!-- 누적 현황 헤더 -->
-<div class="sec-head">
+<div class="sec-head sec-head-collapsible collapsed" id="cumHead" onclick="toggleCumulative()">
   <div class="bar"></div>
   <div class="title">누적 현황</div>
   <div class="meta" id="cumDate"></div>
+  <div class="collapse-toggle">▼</div>
 </div>
 
-<div class="dashboard">
+<div class="dashboard collapsed" id="cumDashboard">
   <div id="hiddenBar"></div>
   <div class="grid-stack" id="gs"></div>
-  <div class="footer">엑셀 드래그 또는 [엑셀 업로드]로 데이터 갱신 · 편집 모드에서 카드 배치/크기 조절 · [보고↔모니터링] 보기 전환 · [캡처] PNG 저장 | v36</div>
+  <div class="footer">엑셀 드래그 또는 [엑셀 업로드]로 데이터 갱신 · 편집 모드에서 카드 배치/크기 조절 · [보고↔모니터링] 보기 전환 · [캡처] PNG 저장 | v39</div>
 </div>
 </div>
 
@@ -1020,6 +1053,38 @@ function renderYesterday(){
     }).join("");
   }
   document.getElementById("yestIssues").innerHTML=issuesHtml;
+  
+  // 전일 상세 카드 렌더
+  renderYestCards(yd);
+  document.getElementById("yestCardsCnt").textContent=`(${yd.length}건)`;
+}
+
+function renderYestCards(yd){
+  if(!yd || yd.length===0){
+    const empty=`<div style="padding:16px;text-align:center;color:var(--muted);font-size:11px">데이터 없음</div>`;
+    document.getElementById("yestCardBrand").innerHTML=empty;
+    document.getElementById("yestCardIssue").innerHTML=empty;
+    document.getElementById("yestCardSupplier").innerHTML=empty;
+    document.getElementById("yestCardDetail").innerHTML=empty;
+    return;
+  }
+  // 기존 렌더 함수 재사용 (dFDates/dF 는 상세목록용, 전일에도 유효)
+  document.getElementById("yestCardBrand").innerHTML=rBrand(yd);
+  document.getElementById("yestCardIssue").innerHTML=rIssue(yd);
+  document.getElementById("yestCardSupplier").innerHTML=rSupplier(yd);
+  document.getElementById("yestCardDetail").innerHTML=rDetail(yd);
+}
+
+function toggleYestCards(){
+  const btn=document.getElementById("yestToggleBtn");
+  const cards=document.getElementById("yestCards");
+  btn.classList.toggle("open");
+  cards.classList.toggle("open");
+}
+
+function toggleCumulative(){
+  document.getElementById("cumHead").classList.toggle("collapsed");
+  document.getElementById("cumDashboard").classList.toggle("collapsed");
 }
 
 function fillCards(){
