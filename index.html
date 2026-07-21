@@ -6,6 +6,7 @@
 <title>입고 특이사항 대시보드 | 2026년 3월</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Nanum+Gothic:wght@400;700&family=Gothic+A1:wght@300;400;500;700&family=Nanum+Myeongjo:wght@400;700&family=Nanum+Gothic+Coding&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gridstack.js/10.3.1/gridstack.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gridstack.js/10.3.1/gridstack-all.js"></script>
 <style>
@@ -31,9 +32,14 @@ body{
   /* density */
   --fs:13px; --fs-sm:11px; --fs-xs:10px;
   --pad-card:16px 20px; --kpi-v:28px; --row-pad:7px; --cell-pad:6px;
-  font-family:'Pretendard','IBM Plex Sans KR',sans-serif;
+  /* 글꼴 · 글자배율 (설정 패널에서 제어) */
+  --ff:'Pretendard','IBM Plex Sans KR',sans-serif;
+  --ffm:'IBM Plex Mono',monospace;
+  --g:1;            /* 전체 배율 */
+  --fsx:var(--g);   /* 현재 영역 배율 (영역/컬럼 규칙이 덮어씀) */
+  font-family:var(--ff);
   background:var(--bg); color:var(--text);
-  -webkit-font-smoothing:antialiased; font-size:var(--fs);
+  -webkit-font-smoothing:antialiased; font-size:calc((var(--fs))*var(--fsx,1));
   font-feature-settings:"tnum";
 }
 body.mode-monitor{
@@ -52,94 +58,94 @@ body.mode-monitor{
 }
 
 /* ═══════════ TOPBAR ═══════════ */
-.topbar{background:var(--topbar);padding:0 24px;height:54px;position:sticky;top:0;z-index:100;display:flex;justify-content:center;border-bottom:2px solid var(--accent)}
+.topbar{background:var(--topbar);padding:0 24px;min-height:54px;position:sticky;top:0;z-index:100;display:flex;justify-content:center;border-bottom:2px solid var(--accent)}
 .topbar-inner{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:1280px}
 .topbar-left{display:flex;align-items:center;gap:12px}
 .topbar-logo{width:30px;height:30px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .topbar-logo svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2}
-.topbar-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:8.5px;font-weight:600;letter-spacing:1.6px;color:var(--accent);text-transform:uppercase;line-height:1.2;filter:brightness(1.5)}
-.topbar-title{font-size:15px;font-weight:700;color:var(--topbar-text);line-height:1.3}
-.topbar-sub{font-size:12px;font-weight:400;color:#78808c;margin-left:4px}
+.topbar-eyebrow{font-family:var(--ffm);font-size:calc((8.5px)*var(--fsx,1));font-weight:600;letter-spacing:1.6px;color:var(--accent);text-transform:uppercase;line-height:1.2;filter:brightness(1.5)}
+.topbar-title{font-size:calc((15px)*var(--fsx,1));font-weight:700;color:var(--topbar-text);line-height:1.3}
+.topbar-sub{font-size:calc((12px)*var(--fsx,1));font-weight:400;color:#78808c;margin-left:4px}
 .topbar-right{display:flex;align-items:center;gap:8px}
-.topdate{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#78808c;margin-right:2px}
+.topdate{font-family:var(--ffm);font-size:calc((10px)*var(--fsx,1));color:#78808c;margin-right:2px}
 .mode-seg{display:inline-flex;border:1px solid #39414e;border-radius:5px;overflow:hidden}
-.mode-seg button{font-size:10px;font-weight:600;padding:5px 12px;border:none;background:transparent;color:#78808c;cursor:pointer;font-family:inherit;transition:all 0.15s;display:flex;align-items:center;gap:4px}
+.mode-seg button{font-size:calc((10px)*var(--fsx,1));font-weight:600;padding:5px 12px;border:none;background:transparent;color:#78808c;cursor:pointer;font-family:inherit;transition:all 0.15s;display:flex;align-items:center;gap:4px}
 .mode-seg button.on{background:var(--accent);color:#fff}
 .mode-seg button:not(.on):hover{color:#c4cad2}
 body.mode-monitor .mode-seg button.on::before{content:"";width:5px;height:5px;border-radius:50%;background:#7df0b0;animation:pulse 1.6s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
-.tb{font-size:10px;padding:5px 12px;border-radius:5px;border:1px solid #39414e;background:transparent;color:#78808c;cursor:pointer;font-family:inherit;font-weight:600;transition:all 0.2s}
+.tb{font-size:calc((10px)*var(--fsx,1));padding:5px 12px;border-radius:5px;border:1px solid #39414e;background:transparent;color:#78808c;cursor:pointer;font-family:inherit;font-weight:600;transition:all 0.2s}
 .tb:hover{border-color:#5a6472;color:#c4cad2}
 .tb.on{background:var(--warn);border-color:var(--warn);color:#fff}
-.bcap{font-size:11px;font-weight:600;padding:7px 15px;border-radius:5px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;transition:filter 0.15s}
+.bcap{font-size:calc((11px)*var(--fsx,1));font-weight:600;padding:7px 15px;border-radius:5px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;transition:filter 0.15s}
 .bcap:hover{filter:brightness(1.12)}
 .bcap:disabled{background:#555c66;cursor:wait}
 
 /* ═══════════ FILTERBAR ═══════════ */
-.filterbar-bg{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:54px;z-index:99}
+.filterbar-bg{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:var(--tbh,54px);z-index:99}
 .filterbar{padding:10px 24px;display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;max-width:1280px;margin:0 auto}
 .fg{display:flex;align-items:center;gap:7px}
-.fl{font-family:'IBM Plex Mono',monospace;font-size:8.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px}
-.cal-toggle{font-size:12px;padding:5px 12px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-family:inherit;font-weight:500;display:flex;align-items:center;gap:6px;transition:border-color 0.15s}
+.fl{font-family:var(--ffm);font-size:calc((8.5px)*var(--fsx,1));font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px}
+.cal-toggle{font-size:calc((12px)*var(--fsx,1));padding:5px 12px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-family:inherit;font-weight:500;display:flex;align-items:center;gap:6px;transition:border-color 0.15s}
 .cal-toggle:hover{border-color:var(--accent)}
 .cal-popup{position:absolute;top:100%;left:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,0.18);padding:14px;z-index:1000;width:300px;display:none;color:var(--text)}
 .cal-popup.open{display:block}
-.cal-nav-btn{width:28px;height:28px;border:1px solid var(--border);background:var(--surface2);border-radius:5px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;color:var(--text-sub);transition:all 0.15s;font-family:inherit}
+.cal-nav-btn{width:28px;height:28px;border:1px solid var(--border);background:var(--surface2);border-radius:5px;cursor:pointer;font-size:calc((13px)*var(--fsx,1));display:flex;align-items:center;justify-content:center;color:var(--text-sub);transition:all 0.15s;font-family:inherit}
 .cal-nav-btn:hover{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .cal-months{display:flex;flex-wrap:wrap;gap:2px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border2)}
-.cal-month{font-size:10px;padding:3px 7px;border-radius:4px;cursor:pointer;color:var(--muted);transition:all 0.12s;font-family:inherit;border:none;background:none}
+.cal-month{font-size:calc((10px)*var(--fsx,1));padding:3px 7px;border-radius:4px;cursor:pointer;color:var(--muted);transition:all 0.12s;font-family:inherit;border:none;background:none}
 .cal-month:hover{background:var(--accent-soft);color:var(--accent)}
 .cal-month.active{background:var(--accent);color:#fff;font-weight:600}
 .cal-month.has-data-month{color:var(--text);font-weight:500}
 .cal-month.month-sel{background:var(--warn);color:#fff;font-weight:600}
 .cal-month.month-sel.active{background:var(--accent)}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
-.cal-dow{font-size:9px;font-weight:600;color:var(--muted);padding:4px 0}
-.cal-day{font-size:11px;padding:6px 2px;border-radius:4px;cursor:pointer;transition:all 0.12s;position:relative}
+.cal-dow{font-size:calc((9px)*var(--fsx,1));font-weight:600;color:var(--muted);padding:4px 0}
+.cal-day{font-size:calc((11px)*var(--fsx,1));padding:6px 2px;border-radius:4px;cursor:pointer;transition:all 0.12s;position:relative}
 .cal-day:hover{background:var(--accent-soft)}
 .cal-day.selected{background:var(--accent);color:#fff;font-weight:600}
 .cal-day.has-data::after{content:"";position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--warn)}
 .cal-day.selected.has-data::after{background:#fff}
 .cal-day.empty{color:var(--border);pointer-events:none}
 .cal-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border2);align-items:center}
-.cal-sel-info{font-size:10px;color:var(--muted);margin-left:auto}
-.cal-apply{font-size:11px;padding:5px 16px;border-radius:5px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-family:inherit;font-weight:600;transition:filter 0.2s}
+.cal-sel-info{font-size:calc((10px)*var(--fsx,1));color:var(--muted);margin-left:auto}
+.cal-apply{font-size:calc((11px)*var(--fsx,1));padding:5px 16px;border-radius:5px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-family:inherit;font-weight:600;transition:filter 0.2s}
 .cal-apply:hover{filter:brightness(1.12)}
 .cal-selected{margin-top:10px;padding-top:10px;border-top:1px solid var(--border2)}
-.cal-selected-label{font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px}
-.cal-selected-dates{font-size:11px;color:var(--text);font-weight:500;line-height:1.6;min-height:20px;max-height:44px;overflow-y:auto}
+.cal-selected-label{font-family:var(--ffm);font-size:calc((8px)*var(--fsx,1));font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px}
+.cal-selected-dates{font-size:calc((11px)*var(--fsx,1));color:var(--text);font-weight:500;line-height:1.6;min-height:20px;max-height:44px;overflow-y:auto}
 .cal-selected-dates .empty{color:var(--muted);font-weight:400}
-.cbtn{font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--text-sub);cursor:pointer;font-family:inherit}
+.cbtn{font-size:calc((10px)*var(--fsx,1));padding:4px 10px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--text-sub);cursor:pointer;font-family:inherit}
 .cbtn.p{background:var(--accent);color:#fff;border-color:var(--accent)}
-.bp{font-size:10px;padding:4px 11px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text-sub);cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:4px;font-family:inherit}
+.bp{font-size:calc((10px)*var(--fsx,1));padding:4px 11px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text-sub);cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:4px;font-family:inherit}
 .bp.active{font-weight:600}
 .dot{width:6px;height:6px;border-radius:50%;display:inline-block}
-.bsm{font-size:9px;color:var(--accent);background:none;border:none;cursor:pointer;text-decoration:underline;font-family:inherit}
+.bsm{font-size:calc((9px)*var(--fsx,1));color:var(--accent);background:none;border:none;cursor:pointer;text-decoration:underline;font-family:inherit}
 
 /* ═══════════ SECTION HEADERS ═══════════ */
 .sec-head{max-width:1280px;margin:16px auto 0;padding:0 4px;display:flex;align-items:center;gap:10px}
 .sec-head .bar{width:4px;height:17px;border-radius:2px;background:var(--warn)}
-.sec-head .title{font-size:14px;font-weight:700;color:var(--text)}
-.sec-head .meta{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);font-weight:500}
+.sec-head .title{font-size:calc((14px)*var(--fsx,1));font-weight:700;color:var(--text)}
+.sec-head .meta{font-family:var(--ffm);font-size:calc((10px)*var(--fsx,1));color:var(--muted);font-weight:500}
 
 /* ═══════════ YESTERDAY SECTION ═══════════ */
 .yest-section{background:var(--accent-soft);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:8px;padding:14px 18px 16px;margin:14px auto 4px;max-width:1248px}
 .yest-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.yest-head .title{font-size:14px;font-weight:700;color:var(--text)}
-.yest-date-select{font-size:11px;font-weight:600;color:var(--accent);background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:3px 22px 3px 8px;cursor:pointer;font-family:inherit;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
+.yest-head .title{font-size:calc((14px)*var(--fsx,1));font-weight:700;color:var(--text)}
+.yest-date-select{font-size:calc((11px)*var(--fsx,1));font-weight:600;color:var(--accent);background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:3px 22px 3px 8px;cursor:pointer;font-family:inherit;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
 .yest-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:12px}
 .yest-kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .yest-kpi-box{background:var(--surface);border-radius:6px;padding:12px 14px;border:1px solid var(--border2);box-shadow:var(--shadow)}
-.yest-kpi-label{font-size:16px;font-weight:600;color:var(--text-sub);letter-spacing:0.2px}
-.yest-kpi-value{font-size:calc(var(--kpi-v) - 2px);font-weight:700;line-height:1.1;margin-top:5px}
+.yest-kpi-label{font-size:calc((16px)*var(--fsx,1));font-weight:600;color:var(--text-sub);letter-spacing:0.2px}
+.yest-kpi-value{font-size:calc((calc(var(--kpi-v) - 2px))*var(--fsx,1));font-weight:700;line-height:1.1;margin-top:5px}
 .yest-issues{background:var(--surface);border-radius:6px;padding:12px 14px;border:1px solid var(--border2);max-height:160px;overflow-y:auto;box-shadow:var(--shadow)}
-.yest-issues-title{font-size:11px;font-weight:700;color:var(--text);margin-bottom:6px}
-.yest-issue-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border2);font-size:11px}
+.yest-issues-title{font-size:calc((11px)*var(--fsx,1));font-weight:700;color:var(--text);margin-bottom:6px}
+.yest-issue-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border2);font-size:calc((11px)*var(--fsx,1))}
 .yest-issue-row:last-child{border:none}
-.yest-issue-rank{font-size:10px;font-weight:700;color:var(--muted);min-width:14px}
+.yest-issue-rank{font-size:calc((10px)*var(--fsx,1));font-weight:700;color:var(--muted);min-width:14px}
 .yest-issue-name{flex:1;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.yest-issue-qty{font-weight:700;color:var(--text-sub);min-width:60px;text-align:right;font-size:11px}
-.yest-empty{text-align:center;color:var(--muted);font-size:11px;padding:18px}
+.yest-issue-qty{font-weight:700;color:var(--text-sub);min-width:60px;text-align:right;font-size:calc((11px)*var(--fsx,1))}
+.yest-empty{text-align:center;color:var(--muted);font-size:calc((11px)*var(--fsx,1));padding:18px}
 
 /* ═══════════ DASHBOARD / GRIDSTACK ═══════════ */
 .dashboard{padding:12px 16px 20px;max-width:1280px;margin:0 auto}
@@ -148,15 +154,15 @@ body.mode-monitor .mode-seg button.on::before{content:"";width:5px;height:5px;bo
 .grid-stack .gs-item-content:hover{border-color:var(--accent);border-width:1px}
 .grid-stack > .grid-stack-item > .ui-resizable-se{width:16px;height:16px;right:4px;bottom:4px;background:none;cursor:se-resize}
 .grid-stack > .grid-stack-item > .ui-resizable-se::after{content:"";position:absolute;right:2px;bottom:2px;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted)}
-.card-x{position:absolute;top:6px;right:8px;width:22px;height:22px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:10px;display:none;align-items:center;justify-content:center;color:var(--muted);z-index:5;transition:all 0.15s}
+.card-x{position:absolute;top:6px;right:8px;width:22px;height:22px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:calc((10px)*var(--fsx,1));display:none;align-items:center;justify-content:center;color:var(--muted);z-index:5;transition:all 0.15s}
 .card-x:hover{color:var(--danger);border-color:var(--danger)}
 body.editing .card-x{display:flex}
 
 /* card titles */
-.ct{font-size:calc(var(--fs) + 0px);font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:6px;line-height:1.3;cursor:default}
+.ct{font-size:calc((calc(var(--fs) + 0px))*var(--fsx,1));font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:6px;line-height:1.3;cursor:default}
 .ct::before{content:"";width:3px;height:12px;border-radius:2px;background:var(--accent);flex-shrink:0}
-.ct .sub{font-size:var(--fs-xs);font-weight:400;color:var(--muted);margin-left:4px}
-.editable-sub{font-size:var(--fs-xs);font-weight:400;color:var(--muted);padding:1px 4px;border-radius:2px;outline:none}
+.ct .sub{font-size:calc((var(--fs-xs))*var(--fsx,1));font-weight:400;color:var(--muted);margin-left:4px}
+.editable-sub{font-size:calc((var(--fs-xs))*var(--fsx,1));font-weight:400;color:var(--muted);padding:1px 4px;border-radius:2px;outline:none}
 body.editing .editable-sub[contenteditable=true]{background:var(--accent-soft);border:1px dashed var(--warn)}
 
 /* KPI */
@@ -167,114 +173,154 @@ body.editing .editable-sub[contenteditable=true]{background:var(--accent-soft);b
 .kpi-box:nth-child(3){border-top-color:var(--warn)}
 .kpi-box:nth-child(4){border-top-color:var(--danger)}
 .kpi-box:nth-child(5){border-top-color:var(--ok)}
-.kpi-label{font-family:'IBM Plex Mono',monospace;font-size:calc(var(--fs-xs) - 1.5px);font-weight:600;color:var(--muted);letter-spacing:0.8px;text-transform:uppercase}
-.kpi-value{font-size:var(--kpi-v);font-weight:700;line-height:1.1;margin-top:4px;letter-spacing:-0.5px}
-.kpi-sub{font-size:var(--fs-xs);color:var(--muted);margin-top:2px}
+.kpi-label{font-family:var(--ffm);font-size:calc((calc(var(--fs-xs) - 1.5px))*var(--fsx,1));font-weight:600;color:var(--muted);letter-spacing:0.8px;text-transform:uppercase}
+.kpi-value{font-size:calc((var(--kpi-v))*var(--fsx,1));font-weight:700;line-height:1.1;margin-top:4px;letter-spacing:-0.5px}
+.kpi-sub{font-size:calc((var(--fs-xs))*var(--fsx,1));color:var(--muted);margin-top:2px}
 
 /* bars */
 .br{display:flex;align-items:center;gap:6px;margin-bottom:5px}
-.bl{min-width:88px;text-align:right;font-size:var(--fs-sm);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bl{min-width:88px;text-align:right;font-size:calc((var(--fs-sm))*var(--fsx,1));font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bt{flex:1;height:16px;background:var(--border2);border-radius:3px;overflow:hidden}
 .bf{height:100%;border-radius:3px;transition:width 0.4s ease}
-.bv{min-width:48px;text-align:right;font-size:var(--fs-sm);font-weight:600;color:var(--text-sub)}
-.bpc{min-width:32px;text-align:right;font-size:var(--fs-xs);color:var(--muted)}
+.bv{min-width:48px;text-align:right;font-size:calc((var(--fs-sm))*var(--fsx,1));font-weight:600;color:var(--text-sub)}
+.bpc{min-width:32px;text-align:right;font-size:calc((var(--fs-xs))*var(--fsx,1));color:var(--muted)}
 
 /* tables */
-.dt{width:100%;border-collapse:collapse;font-size:var(--fs-sm)}
-.dt th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:calc(var(--fs-xs) - 1px);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);padding:5px var(--cell-pad);border-bottom:2px solid var(--border)}
+.dt{width:100%;border-collapse:collapse;font-size:calc((var(--fs-sm))*var(--fsx,1))}
+.dt th{text-align:left;font-family:var(--ffm);font-size:calc((calc(var(--fs-xs) - 1px))*var(--fsx,1));font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);padding:5px var(--cell-pad);border-bottom:2px solid var(--border)}
 .dt th.r{text-align:right}.dt th.c{text-align:center}
-.dt td{padding:var(--cell-pad);border-bottom:1px solid var(--border2)}.dt td.r{text-align:right}.dt td.c{text-align:center}
+.dt td{padding:var(--cell-pad);border-bottom:1px solid var(--border2);font-size:calc((var(--fs-sm))*var(--fsx,1))}.dt td.r{text-align:right}.dt td.c{text-align:center}
 .dt tr:hover td{background:var(--surface2)}
-.rk{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:9px;font-weight:700}
+.rk{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:calc((9px)*var(--fsx,1));font-weight:700}
 .rk1{background:var(--danger);color:#fff}.rk2{background:var(--warn);color:#fff}.rk3{background:var(--border);color:var(--text-sub)}.rkn{background:var(--border2);color:var(--muted)}
-.tg{display:inline-block;font-size:9px;font-weight:500;padding:2px 7px;border-radius:3px}
+.tg{display:inline-block;font-size:calc((9px)*var(--fsx,1));font-weight:500;padding:2px 7px;border-radius:3px}
 .tg-ret{background:var(--accent-soft);color:var(--accent)}
 .tg-mis{background:color-mix(in srgb,var(--danger) 14%,transparent);color:var(--danger)}
-.at{display:inline-block;font-size:9px;font-weight:600;padding:2px 8px;border-radius:3px;background:color-mix(in srgb,var(--danger) 14%,transparent);color:var(--danger)}
+.at{display:inline-block;font-size:calc((9px)*var(--fsx,1));font-weight:600;padding:2px 8px;border-radius:3px;background:color-mix(in srgb,var(--danger) 14%,transparent);color:var(--danger)}
 
 /* trend */
 .trend-c{display:flex;align-items:flex-end;gap:2px;height:110px;padding:6px 0}
 .trend-col{flex:1;display:flex;flex-direction:column;align-items:center}
 .trend-bw{display:flex;flex-direction:column;align-items:center;height:80px;justify-content:flex-end;width:100%}
 .trend-bar{width:70%;min-width:6px;border-radius:3px 3px 0 0;transition:height 0.4s}
-.trend-val{font-size:9px;font-weight:700;color:var(--text-sub);min-height:13px;margin-bottom:1px}
-.trend-date{font-size:7px;color:var(--muted);margin-top:2px;font-weight:500}
+.trend-val{font-size:calc((9px)*var(--fsx,1));font-weight:700;color:var(--text-sub);min-height:13px;margin-bottom:1px}
+.trend-date{font-size:calc((7px)*var(--fsx,1));color:var(--muted);margin-top:2px;font-weight:500}
 .trend-toggle{display:inline-flex;gap:0;margin-left:auto;border:1px solid var(--border);border-radius:4px;overflow:hidden}
-.trend-toggle button{font-size:9px;padding:2px 8px;border:none;background:var(--surface);color:var(--muted);cursor:pointer;font-family:inherit;font-weight:600;transition:all 0.15s}
+.trend-toggle button{font-size:calc((9px)*var(--fsx,1));padding:2px 8px;border:none;background:var(--surface);color:var(--muted);cursor:pointer;font-family:inherit;font-weight:600;transition:all 0.15s}
 .trend-toggle button.on{background:var(--accent);color:#fff}
 .trend-toggle button:hover:not(.on){background:var(--surface2)}
 
 /* repeat rows */
 .rr{display:flex;align-items:center;gap:10px;padding:var(--row-pad) 0;border-bottom:1px solid var(--border2)}
 .rr:last-child{border:none}
-.rc{font-size:20px;font-weight:700;color:var(--danger);min-width:30px;text-align:center}
-.ri{flex:1}.rn{font-size:12px;font-weight:600}.rd{font-size:var(--fs-xs);color:var(--muted);margin-top:1px}
-.rq{font-size:12px;font-weight:700;color:var(--text-sub);min-width:55px;text-align:right}
+.rc{font-size:calc((20px)*var(--fsx,1));font-weight:700;color:var(--danger);min-width:30px;text-align:center}
+.ri{flex:1}.rn{font-size:calc((12px)*var(--fsx,1));font-weight:600}.rd{font-size:calc((var(--fs-xs))*var(--fsx,1));color:var(--muted);margin-top:1px}
+.rq{font-size:calc((12px)*var(--fsx,1));font-weight:700;color:var(--text-sub);min-width:55px;text-align:right}
 
 /* detail filters */
 .df{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
-.ds{font-size:var(--fs-sm);padding:3px 22px 3px 6px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:inherit;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23999'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 5px center;cursor:pointer}
+.ds{font-size:calc((var(--fs-sm))*var(--fsx,1));padding:3px 22px 3px 6px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:inherit;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23999'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 5px center;cursor:pointer}
 .ds option{background:var(--surface);color:var(--text)}
 
 /* hidden cards restore */
 .hidden-bar{background:var(--accent-soft);border:1px dashed var(--warn);border-radius:6px;padding:8px 14px;margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.hidden-bar span{font-size:10px;font-weight:600;color:var(--warn)}
-.hidden-bar button{font-size:10px;padding:3px 10px;border-radius:12px;border:1px solid var(--warn);background:var(--surface);color:var(--warn);cursor:pointer;font-family:inherit}
+.hidden-bar span{font-size:calc((10px)*var(--fsx,1));font-weight:600;color:var(--warn)}
+.hidden-bar button{font-size:calc((10px)*var(--fsx,1));padding:3px 10px;border-radius:12px;border:1px solid var(--warn);background:var(--surface);color:var(--warn);cursor:pointer;font-family:inherit}
 
 /* detail mini-calendar */
 .dcal-wrap{position:relative;display:inline-block}
-.dcal-toggle{font-size:var(--fs-xs);padding:3px 10px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:4px}
+.dcal-toggle{font-size:calc((var(--fs-xs))*var(--fsx,1));padding:3px 10px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:4px}
 .dcal-popup{position:absolute;top:100%;left:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.2);padding:10px;z-index:1000;width:240px;display:none}
 .dcal-popup.open{display:block}
 .dcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;text-align:center}
-.dcal-dow{font-size:8px;font-weight:600;color:var(--muted);padding:3px 0}
-.dcal-day{font-size:10px;padding:4px 1px;border-radius:3px;cursor:pointer;transition:all 0.1s}
+.dcal-dow{font-size:calc((8px)*var(--fsx,1));font-weight:600;color:var(--muted);padding:3px 0}
+.dcal-day{font-size:calc((10px)*var(--fsx,1));padding:4px 1px;border-radius:3px;cursor:pointer;transition:all 0.1s}
 .dcal-day:hover{background:var(--accent-soft)}
 .dcal-day.sel{background:var(--accent);color:#fff;font-weight:600}
 .dcal-day.nodata{color:var(--border);pointer-events:none}
 .dcal-actions{display:flex;gap:4px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border2)}
 
-.footer{text-align:center;padding:12px 0;color:var(--muted);font-size:9px;font-family:'IBM Plex Mono',monospace}
+.footer{text-align:center;padding:12px 0;color:var(--muted);font-size:calc((9px)*var(--fsx,1));font-family:var(--ffm)}
 
 /* drop zone */
 .drop-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(53,86,125,0.1);z-index:9999;align-items:center;justify-content:center}
 .drop-overlay.show{display:flex}
 .drop-box{background:var(--surface);border:3px dashed var(--accent);border-radius:16px;padding:60px 80px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,0.2)}
-.drop-box-title{font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;margin-top:12px}
-.drop-box-sub{font-size:12px;color:var(--muted)}
+.drop-box-title{font-size:calc((18px)*var(--fsx,1));font-weight:700;color:var(--text);margin-bottom:6px;margin-top:12px}
+.drop-box-sub{font-size:calc((12px)*var(--fsx,1));color:var(--muted)}
 
 /* upload bar */
 .upload-bar{display:flex;align-items:center;gap:8px;padding:2px 0}
-.upload-btn{font-size:10px;padding:4px 12px;border-radius:5px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);cursor:pointer;font-family:inherit;font-weight:600;display:none;align-items:center;gap:4px;transition:all 0.15s}
+.upload-btn{font-size:calc((10px)*var(--fsx,1));padding:4px 12px;border-radius:5px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);cursor:pointer;font-family:inherit;font-weight:600;display:none;align-items:center;gap:4px;transition:all 0.15s}
 .upload-btn:hover{background:var(--accent);color:#fff}
 body.editing .upload-btn{display:inline-flex}
-.upload-info{font-size:10px;color:var(--muted);display:none}
+.upload-info{font-size:calc((10px)*var(--fsx,1));color:var(--muted);display:none}
 body.editing .upload-info{display:inline}
-.upload-file{font-size:10px;color:var(--accent);font-weight:600}
+.upload-file{font-size:calc((10px)*var(--fsx,1));color:var(--accent);font-weight:600}
 
 /* v42: 전일 이슈 아래에 상세 목록 추가 (원본 KPI+TOP 유지) + 누적 접기 */
 .yest-detail{margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;box-shadow:var(--shadow);overflow:hidden}
 .yest-detail-head{padding:8px 14px;border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:6px}
-.yest-detail-title{font-size:12px;font-weight:700;color:var(--text)}
-.yest-detail-cnt{font-size:11px;color:var(--muted);font-weight:normal}
+.yest-detail-title{font-size:calc((12px)*var(--fsx,1));font-weight:700;color:var(--text)}
+.yest-detail-cnt{font-size:calc((11px)*var(--fsx,1));color:var(--muted);font-weight:normal}
 .yest-detail-body{max-height:400px;overflow:auto}
-.yest-detail-body table{width:100%;border-collapse:collapse;font-size:11px}
-.yest-detail-body thead th{position:sticky;top:0;background:var(--surface2);text-align:left;padding:6px 10px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap}
+.yest-detail-body table{width:100%;border-collapse:collapse;font-size:calc((11px)*var(--fsx,1))}
+.yest-detail-body thead th{position:sticky;top:0;background:var(--surface2);text-align:left;padding:6px 10px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--border);font-family:var(--ffm);font-size:calc((10px)*var(--fsx,1));text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap}
 .yest-detail-body th.r{text-align:right}
-.yest-detail-body tbody td{padding:5px 10px;border-bottom:1px solid var(--border2);white-space:nowrap}
+.yest-detail-body tbody td{padding:5px 10px;border-bottom:1px solid var(--border2);white-space:nowrap;font-size:calc((11px)*var(--fsx,1))}
 .yest-detail-body tbody td.r{text-align:right;font-weight:600}
 .yest-detail-body tbody tr:nth-child(even){background:var(--zebra)}
 .yest-detail-body tbody tr:hover{background:var(--accent-soft)}
-.yest-detail-body .prod-cell{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--text-sub)}
+.yest-detail-body .prod-cell{font-family:var(--ffm);font-size:calc((10.5px)*var(--fsx,1));color:var(--text-sub)}
 .yest-detail-body .sup-cell{max-width:120px;overflow:hidden;text-overflow:ellipsis}
-.yest-detail-empty{padding:20px;text-align:center;color:var(--muted);font-size:11px}
+.yest-detail-empty{padding:20px;text-align:center;color:var(--muted);font-size:calc((11px)*var(--fsx,1))}
 
 /* 누적 현황 접기 */
 .sec-head-collapsible{cursor:pointer;user-select:none}
 .sec-head-collapsible:hover .title{color:var(--accent)}
-.sec-head .collapse-toggle{margin-left:auto;font-size:11px;color:var(--muted);transition:transform 0.15s;padding:0 6px}
+.sec-head .collapse-toggle{margin-left:auto;font-size:calc((11px)*var(--fsx,1));color:var(--muted);transition:transform 0.15s;padding:0 6px}
 .sec-head.collapsed .collapse-toggle{transform:rotate(-90deg)}
 .dashboard.collapsed{display:none}
+
+/* ═══════════ v43 : 글꼴 설정 패널 ═══════════
+   모든 font-size 는 calc(기준값 * var(--fsx)) 형태라
+   --fsx 를 어느 요소에든 덮어쓰면 그 아래 글자만 배율이 바뀐다.
+   전체=body --g / 영역=영역 컨테이너 --fsx / 컬럼=해당 셀 --fsx */
+#fontPanel{--fsx:1;position:fixed;top:0;right:0;width:340px;height:100%;background:var(--surface);
+  border-left:1px solid var(--border);box-shadow:-6px 0 24px rgba(0,0,0,0.12);z-index:2000;
+  display:none;flex-direction:column;font-family:var(--ff);color:var(--text)}
+#fontPanel.open{display:flex}
+.fp-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.fp-head .t{font-size:14px;font-weight:700}
+.fp-head .x{margin-left:auto;border:none;background:none;font-size:18px;line-height:1;color:var(--muted);cursor:pointer;padding:2px 6px;border-radius:4px}
+.fp-head .x:hover{background:var(--surface2);color:var(--text)}
+.fp-body{flex:1;overflow-y:auto;padding:12px 16px 24px}
+.fp-sec{margin-bottom:16px}
+.fp-sec>h4{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);
+  font-family:var(--ffm);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.fp-sec>h4 .hint{font-family:var(--ff);letter-spacing:0;text-transform:none;font-weight:400;font-size:10px}
+.fp-sel{width:100%;font-size:12px;padding:6px 8px;border-radius:5px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--text);font-family:inherit;cursor:pointer}
+.fp-chk{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-sub);margin-top:7px;cursor:pointer}
+.fp-row{display:flex;align-items:center;gap:6px;padding:3px 0}
+.fp-row .nm{flex:1;font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fp-row .nm.sub{padding-left:8px;color:var(--text-sub);font-size:11.5px}
+.fp-b{width:22px;height:22px;flex-shrink:0;border:1px solid var(--border);background:var(--surface2);
+  color:var(--text-sub);border-radius:5px;cursor:pointer;font-size:13px;line-height:1;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;transition:all .12s}
+.fp-b:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.fp-v{width:44px;text-align:right;font-family:var(--ffm);font-size:11px;font-weight:600;color:var(--text-sub);flex-shrink:0}
+.fp-v.mod{color:var(--warn)}
+.fp-rng{width:100%;margin:6px 0 2px}
+.fp-grp{border:1px solid var(--border2);border-radius:6px;padding:6px 8px;margin-bottom:8px;background:var(--surface2)}
+.fp-grp>.gt{font-size:11px;font-weight:700;color:var(--text-sub);margin-bottom:3px}
+.fp-foot{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
+.fp-foot button{flex:1;font-size:11px;font-weight:600;padding:7px 0;border-radius:5px;cursor:pointer;font-family:inherit}
+.fp-reset{border:1px solid var(--border);background:var(--surface2);color:var(--text-sub)}
+.fp-done{border:none;background:var(--accent);color:#fff}
+.fp-back{position:fixed;inset:0;background:rgba(0,0,0,0.18);z-index:1999;display:none}
+.fp-back.open{display:block}
+@media(max-width:520px){#fontPanel{width:100%}}
 </style>
 
 </head>
@@ -286,6 +332,43 @@ body.editing .upload-info{display:inline}
     <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color:var(--accent)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
     <div class="drop-box-title">엑셀 파일을 여기에 놓으세요</div>
     <div class="drop-box-sub">입고 특이사항 엑셀 파일 (.xlsx)을 드래그하면 자동으로 데이터가 반영됩니다</div>
+  </div>
+</div>
+
+<!-- ═══ 글꼴 설정 패널 ═══ -->
+<div class="fp-back" id="fpBack" onclick="toggleFontPanel(false)"></div>
+<div id="fontPanel">
+  <div class="fp-head">
+    <div class="t">글꼴 · 글자 크기</div>
+    <button class="x" onclick="toggleFontPanel(false)">✕</button>
+  </div>
+  <div class="fp-body">
+    <div class="fp-sec">
+      <h4>글꼴 종류</h4>
+      <select class="fp-sel" id="fpFont" onchange="setFontFamily(this.value)"></select>
+      <label class="fp-chk"><input type="checkbox" id="fpMono" onchange="setMonoSame(this.checked)">숫자·머리글(고정폭)도 같은 글꼴로</label>
+    </div>
+    <div class="fp-sec">
+      <h4>전체 글자 크기</h4>
+      <div class="fp-row">
+        <button class="fp-b" onclick="bumpScale('_g',-1)">−</button>
+        <input type="range" class="fp-rng" id="fpG" min="60" max="200" step="1" value="100" oninput="setScale('_g',this.value)">
+        <button class="fp-b" onclick="bumpScale('_g',1)">＋</button>
+        <span class="fp-v" id="fpGv">100%</span>
+      </div>
+    </div>
+    <div class="fp-sec">
+      <h4>영역별 <span class="hint">— 전체 크기에 곱해집니다</span></h4>
+      <div id="fpRegions"></div>
+    </div>
+    <div class="fp-sec">
+      <h4>컬럼별 <span class="hint">— 해당 영역 크기에 곱해집니다</span></h4>
+      <div id="fpCols"></div>
+    </div>
+  </div>
+  <div class="fp-foot">
+    <button class="fp-reset" onclick="resetFontCfg()">전체 초기화</button>
+    <button class="fp-done" onclick="toggleFontPanel(false)">닫기</button>
   </div>
 </div>
 
@@ -304,6 +387,7 @@ body.editing .upload-info{display:inline}
       <button id="modeRep" class="on" onclick="setMode('report')">보고</button>
       <button id="modeMon" onclick="setMode('monitor')">모니터링</button>
     </div>
+    <button class="tb" id="fontBtn" onclick="toggleFontPanel()" title="글꼴 · 글자 크기 설정">가 글꼴</button>
     <button class="tb" id="editBtn" onclick="toggleEdit()">편집 모드</button>
     <button class="tb" id="resetBtn" onclick="resetLayout()" style="display:none">배치 초기화</button>
     <button class="bcap" id="capBtn" onclick="doCapture()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>캡처</button>
@@ -326,7 +410,7 @@ body.editing .upload-info{display:inline}
       </button>
       <span class="upload-info" id="uploadInfo">또는 파일을 화면에 드래그</span>
     </div>
-    <span style="font-size:11px;color:var(--text-sub);font-weight:500" id="fInfo"></span>
+    <span style="font-size:calc((11px)*var(--fsx,1));color:var(--text-sub);font-weight:500" id="fInfo"></span>
   </div>
 </div>
 </div>
@@ -363,7 +447,7 @@ body.editing .upload-info{display:inline}
 <div class="dashboard collapsed" id="cumDashboard">
   <div id="hiddenBar"></div>
   <div class="grid-stack" id="gs"></div>
-  <div class="footer">엑셀 드래그 또는 [엑셀 업로드]로 데이터 갱신 · 편집 모드에서 카드 배치/크기 조절 · [보고↔모니터링] 보기 전환 · [캡처] PNG 저장 | v42</div>
+  <div class="footer">엑셀 드래그 또는 [엑셀 업로드]로 데이터 갱신 · 편집 모드에서 카드 배치/크기 조절 · [보고↔모니터링] 보기 전환 · [가 글꼴]에서 글꼴·영역별·컬럼별 글자 크기 조절 · [캡처] PNG 저장 | v43</div>
 </div>
 </div>
 
@@ -793,7 +877,7 @@ function renderCal(){
   // Year nav
   let h=`<div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:6px">`;
   h+=`<button class="cal-nav-btn" onclick="calPrevY()">«</button>`;
-  h+=`<span style="font-size:13px;font-weight:700;min-width:50px;text-align:center">${year}년</span>`;
+  h+=`<span style="font-size:calc((13px)*var(--fsx,1));font-weight:700;min-width:50px;text-align:center">${year}년</span>`;
   h+=`<button class="cal-nav-btn" onclick="calNextY()">»</button>`;
   h+=`</div>`;
 
@@ -813,7 +897,7 @@ function renderCal(){
     h+=`<button class="${cls.join(" ")}" title="${tip}" onclick="calToggleMonth(${m})">${m+1}월${allSel?" ✓":""}</button>`;
   }
   h+=`</div>`;
-  h+=`<div style="font-size:9px;color:var(--muted);margin:-4px 0 8px;padding-left:1px">월 버튼 클릭 = 그 달 전체 선택 · 날짜 클릭 = 개별 선택</div>`;
+  h+=`<div style="font-size:calc((9px)*var(--fsx,1));color:var(--muted);margin:-4px 0 8px;padding-left:1px">월 버튼 클릭 = 그 달 전체 선택 · 날짜 클릭 = 개별 선택</div>`;
 
   // Day grid
   h+=`<div class="cal-grid">`;
@@ -916,7 +1000,7 @@ function rTrend(d){
       const h=Math.max(v/mx*75,2);
       const int=v/mx;
       const op=(0.35+int*0.65).toFixed(2);
-      return `<div class="trend-col" style="max-width:80px"><div class="trend-val" style="font-size:11px">${fmt(v)} <span style='font-size:0.65em;color:var(--muted)'>pcs</span></div><div class="trend-bw"><div class="trend-bar" style="height:${h}px;background:var(--accent);opacity:${op};width:50px;border-radius:4px 4px 0 0"></div></div><div class="trend-date" style="font-size:11px;font-weight:600;color:var(--text-sub);margin-top:4px">${parseInt(m)}월</div></div>`;
+      return `<div class="trend-col" style="max-width:80px"><div class="trend-val" style="font-size:calc((11px)*var(--fsx,1))">${fmt(v)} <span style='font-size:0.65em;color:var(--muted)'>pcs</span></div><div class="trend-bw"><div class="trend-bar" style="height:${h}px;background:var(--accent);opacity:${op};width:50px;border-radius:4px 4px 0 0"></div></div><div class="trend-date" style="font-size:calc((11px)*var(--fsx,1));font-weight:600;color:var(--text-sub);margin-top:4px">${parseInt(m)}월</div></div>`;
     }).join("")}</div>`;
   }
 }
@@ -934,9 +1018,9 @@ function rIssue(d){
   }).join("");
 }
 
-function rSupplier(d){const t=d.reduce((s,r)=>s+r.qty,0);const m={};d.forEach(r=>{if(!m[r.sup])m[r.sup]={s:r.sup,q:0,c:0,br:new Set(),tp:{}};m[r.sup].q+=r.qty;m[r.sup].c++;m[r.sup].br.add(r.brand);m[r.sup].tp[r.type]=(m[r.sup].tp[r.type]||0)+r.qty});const ls=Object.values(m).sort((a,b)=>b.q-a.q).slice(0,8);const rc=["rk1","rk1","rk2","rk3"];let h=`<div class="ct">${CN.supplier}</div><table class="dt"><thead><tr><th></th><th>업체명</th><th class="r">건수</th><th class="r">수량</th><th class="c">브랜드</th><th>이슈</th></tr></thead><tbody>`;ls.forEach((s,i)=>{const tpList=Object.entries(s.tp).sort((a,b)=>b[1]-a[1]);const top=tpList[0];const others=tpList.length-1;const tooltip=tpList.map(([k,v])=>k+" "+fmt(v)+"pcs").join("\n");h+=`<tr><td><span class="rk ${rc[i]||"rkn"}">${i+1}</span></td><td style="font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.s}</td><td class="r">${s.c} <span style="font-size:0.65em;color:var(--muted)">건</span></td><td class="r" style="font-weight:700">${fmt(s.q)} <span style="font-size:0.65em;color:var(--muted)">pcs</span></td><td class="c" style="font-size:10px">${[...s.br].slice(0,2).join(", ")}</td><td title="${tooltip}" style="cursor:default"><span class="tg" style="background:${getTC(top[0])}20;color:${getTCD(top[0])};font-weight:600">${top[0]}</span>${others>0?`<span style="font-size:9px;color:var(--muted);margin-left:3px">외 ${others}</span>`:""}</td></tr>`});return h+"</tbody></table>"}
+function rSupplier(d){const t=d.reduce((s,r)=>s+r.qty,0);const m={};d.forEach(r=>{if(!m[r.sup])m[r.sup]={s:r.sup,q:0,c:0,br:new Set(),tp:{}};m[r.sup].q+=r.qty;m[r.sup].c++;m[r.sup].br.add(r.brand);m[r.sup].tp[r.type]=(m[r.sup].tp[r.type]||0)+r.qty});const ls=Object.values(m).sort((a,b)=>b.q-a.q).slice(0,8);const rc=["rk1","rk1","rk2","rk3"];let h=`<div class="ct">${CN.supplier}</div><table class="dt"><thead><tr><th></th><th>업체명</th><th class="r">건수</th><th class="r">수량</th><th class="c">브랜드</th><th>이슈</th></tr></thead><tbody>`;ls.forEach((s,i)=>{const tpList=Object.entries(s.tp).sort((a,b)=>b[1]-a[1]);const top=tpList[0];const others=tpList.length-1;const tooltip=tpList.map(([k,v])=>k+" "+fmt(v)+"pcs").join("\n");h+=`<tr><td><span class="rk ${rc[i]||"rkn"}">${i+1}</span></td><td style="font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.s}</td><td class="r">${s.c} <span style="font-size:0.65em;color:var(--muted)">건</span></td><td class="r" style="font-weight:700">${fmt(s.q)} <span style="font-size:0.65em;color:var(--muted)">pcs</span></td><td class="c" style="font-size:calc((10px)*var(--fsx,1))">${[...s.br].slice(0,2).join(", ")}</td><td title="${tooltip}" style="cursor:default"><span class="tg" style="background:${getTC(top[0])}20;color:${getTCD(top[0])};font-weight:600">${top[0]}</span>${others>0?`<span style="font-size:calc((9px)*var(--fsx,1));color:var(--muted);margin-left:3px">외 ${others}</span>`:""}</td></tr>`});return h+"</tbody></table>"}
 
-function rRepeat(d){const m={};d.forEach(r=>{const k=r.sup+"|||"+r.type;if(!m[k])m[k]={sup:r.sup,type:r.type,cnt:0,qty:0,br:new Set(),ds:new Set()};m[k].cnt++;m[k].qty+=r.qty;m[k].br.add(r.brand);m[k].ds.add(r.d)});const reps=Object.values(m).filter(x=>x.cnt>=3).sort((a,b)=>b.cnt-a.cnt);const sub=gT("repeat");const ed=editing?` contenteditable="true" onblur="sT('repeat',this.textContent)"`:"";let h=`<div class="ct">${CN.repeat} <span class="editable-sub"${ed}>${sub}</span></div>`;if(!reps.length)return h+`<div style="color:var(--muted);font-size:12px;padding:12px;text-align:center">해당 조건에 반복 이슈 없음</div>`;return h+reps.slice(0,6).map(x=>`<div class="rr"><div class="rc">${x.cnt} <span style="font-size:0.65em;color:var(--muted)">회</span></div><div class="ri"><div class="rn">${x.sup} <span class="at">${x.type}</span></div><div class="rd">${[...x.br].join(", ")} · ${x.ds.size}일간</div></div><div class="rq">${fmt(x.qty)} <span style="font-size:0.65em;color:var(--muted)">pcs</span></div></div>`).join("")}
+function rRepeat(d){const m={};d.forEach(r=>{const k=r.sup+"|||"+r.type;if(!m[k])m[k]={sup:r.sup,type:r.type,cnt:0,qty:0,br:new Set(),ds:new Set()};m[k].cnt++;m[k].qty+=r.qty;m[k].br.add(r.brand);m[k].ds.add(r.d)});const reps=Object.values(m).filter(x=>x.cnt>=3).sort((a,b)=>b.cnt-a.cnt);const sub=gT("repeat");const ed=editing?` contenteditable="true" onblur="sT('repeat',this.textContent)"`:"";let h=`<div class="ct">${CN.repeat} <span class="editable-sub"${ed}>${sub}</span></div>`;if(!reps.length)return h+`<div style="color:var(--muted);font-size:calc((12px)*var(--fsx,1));padding:12px;text-align:center">해당 조건에 반복 이슈 없음</div>`;return h+reps.slice(0,6).map(x=>`<div class="rr"><div class="rc">${x.cnt} <span style="font-size:0.65em;color:var(--muted)">회</span></div><div class="ri"><div class="rn">${x.sup} <span class="at">${x.type}</span></div><div class="rd">${[...x.br].join(", ")} · ${x.ds.size}일간</div></div><div class="rq">${fmt(x.qty)} <span style="font-size:0.65em;color:var(--muted)">pcs</span></div></div>`).join("")}
 
 let detCalVY=2026,detCalVM=2;
 let tempDFDates=new Set();
@@ -972,11 +1056,11 @@ if(detCalO){
   const dateSet=new Set(dates);
   h+=`<div class="dcal-popup open">`;
   h+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">`;
-  h+=`<button class="cal-nav-btn" style="width:22px;height:22px;font-size:11px" onclick="detCalPY()">«</button>`;
-  h+=`<button class="cal-nav-btn" style="width:22px;height:22px;font-size:11px" onclick="detCalPM()">‹</button>`;
-  h+=`<span style="font-size:11px;font-weight:700;min-width:80px;text-align:center">${detCalVY}년 ${mn2[detCalVM]}</span>`;
-  h+=`<button class="cal-nav-btn" style="width:22px;height:22px;font-size:11px" onclick="detCalNM()">›</button>`;
-  h+=`<button class="cal-nav-btn" style="width:22px;height:22px;font-size:11px" onclick="detCalNY()">»</button>`;
+  h+=`<button class="cal-nav-btn" style="width:22px;height:22px;font-size:calc((11px)*var(--fsx,1))" onclick="detCalPY()">«</button>`;
+  h+=`<button class="cal-nav-btn" style="width:22px;height:22px;font-size:calc((11px)*var(--fsx,1))" onclick="detCalPM()">‹</button>`;
+  h+=`<span style="font-size:calc((11px)*var(--fsx,1));font-weight:700;min-width:80px;text-align:center">${detCalVY}년 ${mn2[detCalVM]}</span>`;
+  h+=`<button class="cal-nav-btn" style="width:22px;height:22px;font-size:calc((11px)*var(--fsx,1))" onclick="detCalNM()">›</button>`;
+  h+=`<button class="cal-nav-btn" style="width:22px;height:22px;font-size:calc((11px)*var(--fsx,1))" onclick="detCalNY()">»</button>`;
   h+=`</div><div class="dcal-grid">`;
   dw2.forEach((x,i)=>h+=`<div class="dcal-dow" style="${i===0?'color:var(--sun)':i===6?'color:var(--sat)':''}">${x}</div>`);
   for(let i=0;i<sd2;i++)h+=`<div class="dcal-day nodata"></div>`;
@@ -990,10 +1074,10 @@ if(detCalO){
     h+=`<div class="${cls2.join(" ")}" style="${sty2}" onclick="tDCal('${ds2}')">${dd}</div>`;
   }
   const tCnt=tempDFDates.size;const detInfo=tCnt===0?"전체":fmtDateRange(tempDFDates);
-  h+=`</div><div class="dcal-actions"><button class="cbtn" style="font-size:9px;padding:3px 8px" onclick="detCalMonth()">${mn2[detCalVM]} 전체</button><button class="cbtn p" style="font-size:9px;padding:3px 8px" onclick="aDCal()">해제</button><span class="cal-sel-info">${detInfo}</span><button class="cbtn" style="font-size:9px;padding:3px 8px" onclick="detCalO=false;fillCards()">취소</button><button class="cal-apply" style="font-size:10px;padding:4px 12px" onclick="applyDetCal()">조회</button></div></div>`;
+  h+=`</div><div class="dcal-actions"><button class="cbtn" style="font-size:calc((9px)*var(--fsx,1));padding:3px 8px" onclick="detCalMonth()">${mn2[detCalVM]} 전체</button><button class="cbtn p" style="font-size:calc((9px)*var(--fsx,1));padding:3px 8px" onclick="aDCal()">해제</button><span class="cal-sel-info">${detInfo}</span><button class="cbtn" style="font-size:calc((9px)*var(--fsx,1));padding:3px 8px" onclick="detCalO=false;fillCards()">취소</button><button class="cal-apply" style="font-size:calc((10px)*var(--fsx,1));padding:4px 12px" onclick="applyDetCal()">조회</button></div></div>`;
 }
 h+=`</div>`;
-h+=`<select class="ds" onchange="dF.brand=this.value;fillCards()"><option value="전체">브랜드</option>${brands.map(x=>`<option value="${x}"${dF.brand===x?" selected":""}>${x}</option>`).join("")}</select>`;h+=`<select class="ds" onchange="dF.sup=this.value;fillCards()"><option value="전체">업체</option>${sups.map(x=>`<option value="${x}"${dF.sup===x?" selected":""}>${x}</option>`).join("")}</select>`;h+=`<select class="ds" onchange="dF.type=this.value;fillCards()"><option value="전체">이슈</option>${types.map(x=>`<option value="${x}"${dF.type===x?" selected":""}>${x}</option>`).join("")}</select>`;if(hf)h+=`<button class="bsm" onclick="dF={sup:'전체',brand:'전체',type:'전체'};dFDates.clear();detCalO=false;fillCards()">초기화</button>`;h+=`</div><div style="overflow-y:auto;max-height:calc(100% - 70px);border:1px solid #eee;border-radius:4px"><table class="dt"><thead><tr><th>날짜</th><th>브랜드</th><th>업체</th><th>복종</th><th>품번</th><th>구분</th><th class="r">수량</th><th>이슈</th></tr></thead><tbody>`;fd.slice(0,80).forEach((r,i)=>{h+=`<tr style="background:${i%2?"var(--zebra)":""}"><td>${r.d}</td><td><span class="dot" style="background:${getBC(r.brand)};margin-right:3px"></span>${r.brand}</td><td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.sup}</td><td>${r.cat}</td><td style="font-family:'IBM Plex Mono',monospace;font-size:0.9em;color:var(--text-sub);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.product||'<span style=\"color:var(--muted)\">—</span>'}</td><td><span class="tg ${r.ret?"tg-ret":"tg-mis"}" style="font-weight:500">${r.ret?"반송":"미입고"}</span></td><td class="r" style="font-weight:600">${fmt(r.qty)} <span style="font-size:0.65em;color:var(--muted)">pcs</span></td><td><span class="tg" style="background:${getTC(r.type)}20;color:${getTCD(r.type)};font-weight:500">${r.type}</span></td></tr>`});return h+"</tbody></table></div>"}
+h+=`<select class="ds" onchange="dF.brand=this.value;fillCards()"><option value="전체">브랜드</option>${brands.map(x=>`<option value="${x}"${dF.brand===x?" selected":""}>${x}</option>`).join("")}</select>`;h+=`<select class="ds" onchange="dF.sup=this.value;fillCards()"><option value="전체">업체</option>${sups.map(x=>`<option value="${x}"${dF.sup===x?" selected":""}>${x}</option>`).join("")}</select>`;h+=`<select class="ds" onchange="dF.type=this.value;fillCards()"><option value="전체">이슈</option>${types.map(x=>`<option value="${x}"${dF.type===x?" selected":""}>${x}</option>`).join("")}</select>`;if(hf)h+=`<button class="bsm" onclick="dF={sup:'전체',brand:'전체',type:'전체'};dFDates.clear();detCalO=false;fillCards()">초기화</button>`;h+=`</div><div style="overflow-y:auto;max-height:calc(100% - 70px);border:1px solid #eee;border-radius:4px"><table class="dt"><thead><tr><th>날짜</th><th>브랜드</th><th>업체</th><th>복종</th><th>품번</th><th>구분</th><th class="r">수량</th><th>이슈</th></tr></thead><tbody>`;fd.slice(0,80).forEach((r,i)=>{h+=`<tr style="background:${i%2?"var(--zebra)":""}"><td>${r.d}</td><td><span class="dot" style="background:${getBC(r.brand)};margin-right:3px"></span>${r.brand}</td><td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.sup}</td><td>${r.cat}</td><td style="font-family:var(--ffm);font-size:0.9em;color:var(--text-sub);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.product||'<span style=\"color:var(--muted)\">—</span>'}</td><td><span class="tg ${r.ret?"tg-ret":"tg-mis"}" style="font-weight:500">${r.ret?"반송":"미입고"}</span></td><td class="r" style="font-weight:600">${fmt(r.qty)} <span style="font-size:0.65em;color:var(--muted)">pcs</span></td><td><span class="tg" style="background:${getTC(r.type)}20;color:${getTCD(r.type)};font-weight:500">${r.type}</span></td></tr>`});return h+"</tbody></table></div>"}
 
 const REN={kpi:rKPI,trend:rTrend,brand:rBrand,issue:rIssue,supplier:rSupplier,repeat:rRepeat,detail:rDetail};
 
@@ -1049,7 +1133,7 @@ function renderYesterday(){
     issuesHtml+=topIssues.map((s,i)=>{
       const tList=[...s.types].join(", ");
       const bList=[...s.brands].join("/");
-      return `<div class="yest-issue-row"><div class="yest-issue-rank">${i+1}.</div><div class="yest-issue-name">${s.sup} <span style="color:var(--muted);font-size:10px">[${bList}] ${tList}</span></div><div class="yest-issue-qty">${fmt(s.q)} <span style="font-size:0.65em;color:var(--muted)">pcs</span></div></div>`;
+      return `<div class="yest-issue-row"><div class="yest-issue-rank">${i+1}.</div><div class="yest-issue-name">${s.sup} <span style="color:var(--muted);font-size:calc((10px)*var(--fsx,1))">[${bList}] ${tList}</span></div><div class="yest-issue-qty">${fmt(s.q)} <span style="font-size:0.65em;color:var(--muted)">pcs</span></div></div>`;
     }).join("");
   }
   document.getElementById("yestIssues").innerHTML=issuesHtml;
@@ -1125,7 +1209,183 @@ function fillCards(){
   });
 }
 
+// ═══════════════════════════════════════════════════════════════
+// v43 : 글꼴 / 글자 크기 설정
+//   전체(--g) × 영역(--fsx) × 컬럼(--fsx) 3단 배율.
+//   화면 CSS 의 모든 font-size 가 calc(기준 * var(--fsx)) 라
+//   규칙 한 줄로 그 영역 아래 글자만 확대·축소된다.
+// ═══════════════════════════════════════════════════════════════
+const FONT_LIST=[
+  ["'Pretendard','IBM Plex Sans KR',sans-serif","기본 (프리텐다드)"],
+  ["'IBM Plex Sans KR',sans-serif","IBM Plex Sans KR"],
+  ["'Noto Sans KR',sans-serif","본고딕 (Noto Sans KR)"],
+  ["'Gothic A1',sans-serif","고딕 A1"],
+  ["'Nanum Gothic',sans-serif","나눔고딕"],
+  ["'Nanum Myeongjo',serif","나눔명조"],
+  ["'Nanum Gothic Coding',monospace","나눔고딕코딩 (고정폭)"],
+  ["'Malgun Gothic','맑은 고딕',sans-serif","맑은 고딕"],
+  ["system-ui,-apple-system,sans-serif","시스템 기본"]
+];
+const MONO_DEF="'IBM Plex Mono',monospace";
+
+const FP_REGIONS=[
+  {k:"top",   sel:".topbar-inner", nm:"상단 바"},
+  {k:"filt",  sel:".filterbar",    nm:"필터 바 (날짜·브랜드)"},
+  {k:"yhd",   sel:".yest-head",    nm:"전일 이슈 · 제목/날짜"},
+  {k:"ykpi",  sel:"#yestKpi",      nm:"전일 이슈 · KPI"},
+  {k:"yiss",  sel:"#yestIssues",   nm:"전일 이슈 · 주요 이슈"},
+  {k:"ydet",  sel:"#yestDetail",   nm:"전일 이슈 · 상세 목록"},
+  {k:"chd",   sel:"#cumHead",      nm:"누적 현황 · 헤더"},
+  {k:"c_kpi",     sel:"#card-kpi",      nm:"누적 · 핵심 지표 요약"},
+  {k:"c_trend",   sel:"#card-trend",    nm:"누적 · 일별 이슈 추이"},
+  {k:"c_brand",   sel:"#card-brand",    nm:"누적 · 브랜드별 이슈 수량"},
+  {k:"c_issue",   sel:"#card-issue",    nm:"누적 · 이슈 유형별 현황"},
+  {k:"c_supplier",sel:"#card-supplier", nm:"누적 · 이슈업체"},
+  {k:"c_repeat",  sel:"#card-repeat",   nm:"누적 · 반복 이슈 업체"},
+  {k:"c_detail",  sel:"#card-detail",   nm:"누적 · 상세 이슈 목록"}
+];
+
+// 컬럼 단위. sel(n) 은 1-base nth-child 선택자.
+const FP_COLS=[
+  {k:"ykpi", t:"전일 이슈 · KPI", reg:"ykpi",
+   sel:n=>`#yestKpi .yest-kpi-box:nth-child(${n})`,
+   cols:["건수","이슈 수량","반송","이슈 업체"]},
+  {k:"ydet", t:"전일 이슈 · 상세 목록 표", reg:"ydet",
+   sel:n=>`#yestDetail table tr>*:nth-child(${n})`,
+   cols:["브랜드","업체","복종","품번","구분","수량","이슈"]},
+  {k:"kpi", t:"누적 · 핵심 지표 요약", reg:"c_kpi",
+   sel:n=>`#card-kpi .kpi-box:nth-child(${n})`,
+   cols:["총 건수","총 이슈 수량","반송 수량","미입고/취소","이슈 업체"]},
+  {k:"sup", t:"누적 · 이슈업체 표", reg:"c_supplier",
+   sel:n=>`#card-supplier table tr>*:nth-child(${n})`,
+   cols:["순위","업체명","건수","수량","브랜드","이슈"]},
+  {k:"det", t:"누적 · 상세 이슈 목록 표", reg:"c_detail",
+   sel:n=>`#card-detail table tr>*:nth-child(${n})`,
+   cols:["날짜","브랜드","업체","복종","품번","구분","수량","이슈"]}
+];
+
+const FCFG_KEY="_fs2";
+let FCFG={ff:"",mono:false,g:100,reg:{},col:{}};
+try{FCFG=Object.assign(FCFG,JSON.parse(localStorage.getItem(FCFG_KEY)||"{}"))}catch(e){}
+FCFG.reg=FCFG.reg||{}; FCFG.col=FCFG.col||{};
+
+function saveFontCfg(){try{localStorage.setItem(FCFG_KEY,JSON.stringify(FCFG))}catch(e){}}
+const clampPct=v=>Math.max(40,Math.min(300,Math.round(+v)||100));
+function regPct(k){return FCFG.reg[k]||100}
+function colPct(g,i){return (FCFG.col[g]||{})[i]||100}
+
+function applyFontCfg(){
+  const b=document.body;
+  b.style.setProperty("--ff",FCFG.ff||FONT_LIST[0][0]);
+  b.style.setProperty("--ffm",FCFG.mono?(FCFG.ff||FONT_LIST[0][0]):MONO_DEF);
+  b.style.setProperty("--g",(FCFG.g||100)/100);
+
+  let css="";
+  FP_REGIONS.forEach(r=>{
+    const p=regPct(r.k);
+    if(p!==100) css+=`${r.sel}{--fsx:calc(var(--g)*${(p/100).toFixed(3)})}\n`;
+  });
+  FP_COLS.forEach(g=>{
+    const base=regPct(g.reg)/100;
+    g.cols.forEach((nm,i)=>{
+      const p=colPct(g.k,i);
+      if(p!==100) css+=`${g.sel(i+1)}{--fsx:calc(var(--g)*${(base*p/100).toFixed(3)})}\n`;
+    });
+  });
+  let st=document.getElementById("fontRules");
+  if(!st){st=document.createElement("style");st.id="fontRules";document.head.appendChild(st)}
+  st.textContent=css;
+  syncTopbarH();
+}
+
+// 상단바가 글자 크기에 따라 커지므로 필터바 sticky 위치를 맞춘다
+function syncTopbarH(){
+  setTimeout(()=>{
+    const tb=document.querySelector(".topbar");
+    if(tb)document.documentElement.style.setProperty("--tbh",tb.offsetHeight+"px");
+  },0);
+}
+window.addEventListener("resize",syncTopbarH);
+
+function setFontFamily(v){FCFG.ff=v;saveFontCfg();applyFontCfg()}
+function setMonoSame(v){FCFG.mono=!!v;saveFontCfg();applyFontCfg()}
+
+/* key 형식 : "_g" = 전체 / "r:영역키" = 영역 / "c:그룹키:인덱스" = 컬럼 */
+function getScale(key){
+  if(key==="_g")return FCFG.g||100;
+  const p=key.split(":");
+  if(p[0]==="r")return regPct(p[1]);
+  return colPct(p[1],+p[2]);
+}
+function setScale(key,v){
+  v=clampPct(v);
+  if(key==="_g")FCFG.g=v;
+  else{
+    const p=key.split(":");
+    if(p[0]==="r"){ if(v===100)delete FCFG.reg[p[1]]; else FCFG.reg[p[1]]=v; }
+    else{ FCFG.col[p[1]]=FCFG.col[p[1]]||{};
+          if(v===100)delete FCFG.col[p[1]][+p[2]]; else FCFG.col[p[1]][+p[2]]=v; }
+  }
+  saveFontCfg();applyFontCfg();updateFontPanelValues();
+}
+function bumpScale(key,dir){
+  const step=(window.event&&window.event.shiftKey)?10:5;
+  setScale(key,getScale(key)+dir*step);
+}
+
+function fpRow(key,name,sub){
+  return `<div class="fp-row" data-fk="${key}">
+    <span class="nm${sub?" sub":""}">${name}</span>
+    <button class="fp-b" onclick="bumpScale('${key}',-1)" title="작게 (Shift=10%)">−</button>
+    <button class="fp-b" onclick="bumpScale('${key}',1)" title="크게 (Shift=10%)">＋</button>
+    <span class="fp-v">100%</span>
+  </div>`;
+}
+
+function buildFontPanel(){
+  const fs=document.getElementById("fpFont");
+  fs.innerHTML=FONT_LIST.map(([v,l])=>`<option value="${v.replace(/"/g,"&quot;")}">${l}</option>`).join("");
+  fs.value=FCFG.ff||FONT_LIST[0][0];
+  document.getElementById("fpMono").checked=!!FCFG.mono;
+  document.getElementById("fpRegions").innerHTML=
+    FP_REGIONS.map(r=>fpRow("r:"+r.k,r.nm)).join("");
+  document.getElementById("fpCols").innerHTML=
+    FP_COLS.map(g=>`<div class="fp-grp"><div class="gt">${g.t}</div>`+
+      g.cols.map((c,i)=>fpRow(`c:${g.k}:${i}`,c,true)).join("")+`</div>`).join("");
+  updateFontPanelValues();
+}
+
+function updateFontPanelValues(){
+  const g=FCFG.g||100;
+  const gv=document.getElementById("fpGv"),gr=document.getElementById("fpG");
+  if(gv)gv.textContent=g+"%";
+  if(gr&&+gr.value!==g)gr.value=g;
+  document.querySelectorAll(".fp-row[data-fk]").forEach(row=>{
+    const v=getScale(row.dataset.fk);
+    const el=row.querySelector(".fp-v");
+    el.textContent=v+"%";
+    el.classList.toggle("mod",v!==100);
+  });
+}
+
+function toggleFontPanel(force){
+  const p=document.getElementById("fontPanel"),b=document.getElementById("fpBack");
+  const open=(force===undefined)?!p.classList.contains("open"):!!force;
+  p.classList.toggle("open",open);b.classList.toggle("open",open);
+  document.getElementById("fontBtn").classList.toggle("on",open);
+  if(open)buildFontPanel();
+}
+
+function resetFontCfg(){
+  if(!confirm("글꼴·글자 크기 설정을 모두 초기화할까요?"))return;
+  FCFG={ff:"",mono:false,g:100,reg:{},col:{}};
+  saveFontCfg();applyFontCfg();buildFontPanel();
+}
+
+document.addEventListener("keydown",e=>{if(e.key==="Escape")toggleFontPanel(false)});
+
 document.addEventListener("click",e=>{});
+applyFontCfg();
 initB();initGrid();applyMode();loadFromSheet();
 </script>
 </body>
