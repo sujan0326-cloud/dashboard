@@ -35,8 +35,10 @@ body{
   /* 글꼴 · 글자배율 (설정 패널에서 제어) */
   --ff:'Pretendard','IBM Plex Sans KR',sans-serif;
   --ffm:'IBM Plex Mono',monospace;
-  --g:1;            /* 전체 배율 */
-  --fsx:var(--g);   /* 현재 영역 배율 (영역/컬럼 규칙이 덮어씀) */
+  --g:1;             /* 전체 배율 — 글자(라벨·텍스트) */
+  --gn:1;            /* 전체 배율 — 숫자(수치) */
+  --fsx:var(--g);    /* 현재 영역의 글자 배율 (영역/컬럼 규칙이 덮어씀) */
+  --nfsx:var(--gn);  /* 현재 영역의 숫자 배율 */
   font-family:var(--ff);
   background:var(--bg); color:var(--text);
   -webkit-font-smoothing:antialiased; font-size:calc((var(--fs))*var(--fsx,1));
@@ -67,7 +69,7 @@ body.mode-monitor{
 .topbar-title{font-size:calc((15px)*var(--fsx,1));font-weight:700;color:var(--topbar-text);line-height:1.3}
 .topbar-sub{font-size:calc((12px)*var(--fsx,1));font-weight:400;color:#78808c;margin-left:4px}
 .topbar-right{display:flex;align-items:center;gap:8px}
-.topdate{font-family:var(--ffm);font-size:calc((10px)*var(--fsx,1));color:#78808c;margin-right:2px}
+.topdate{font-family:var(--ffm);font-size:calc((10px)*var(--nfsx,var(--fsx,1)));color:#78808c;margin-right:2px}
 .mode-seg{display:inline-flex;border:1px solid #39414e;border-radius:5px;overflow:hidden}
 .mode-seg button{font-size:calc((10px)*var(--fsx,1));font-weight:600;padding:5px 12px;border:none;background:transparent;color:#78808c;cursor:pointer;font-family:inherit;transition:all 0.15s;display:flex;align-items:center;gap:4px}
 .mode-seg button.on{background:var(--accent);color:#fff}
@@ -126,7 +128,7 @@ body.mode-monitor .mode-seg button.on::before{content:"";width:5px;height:5px;bo
 .sec-head{max-width:1280px;margin:16px auto 0;padding:0 4px;display:flex;align-items:center;gap:10px}
 .sec-head .bar{width:4px;height:17px;border-radius:2px;background:var(--warn)}
 .sec-head .title{font-size:calc((14px)*var(--fsx,1));font-weight:700;color:var(--text)}
-.sec-head .meta{font-family:var(--ffm);font-size:calc((10px)*var(--fsx,1));color:var(--muted);font-weight:500}
+.sec-head .meta{font-family:var(--ffm);font-size:calc((10px)*var(--nfsx,var(--fsx,1)));color:var(--muted);font-weight:500}
 
 /* ═══════════ YESTERDAY SECTION ═══════════ */
 .yest-section{background:var(--accent-soft);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:8px;padding:14px 18px 16px;margin:14px auto 4px;max-width:1248px}
@@ -137,14 +139,14 @@ body.mode-monitor .mode-seg button.on::before{content:"";width:5px;height:5px;bo
 .yest-kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .yest-kpi-box{background:var(--surface);border-radius:6px;padding:12px 14px;border:1px solid var(--border2);box-shadow:var(--shadow)}
 .yest-kpi-label{font-size:calc((16px)*var(--fsx,1));font-weight:600;color:var(--text-sub);letter-spacing:0.2px}
-.yest-kpi-value{font-size:calc((calc(var(--kpi-v) - 2px))*var(--fsx,1));font-weight:700;line-height:1.1;margin-top:5px}
+.yest-kpi-value{font-size:calc((calc(var(--kpi-v) - 2px))*var(--nfsx,var(--fsx,1)));font-weight:700;line-height:1.1;margin-top:5px}
 .yest-issues{background:var(--surface);border-radius:6px;padding:12px 14px;border:1px solid var(--border2);max-height:160px;overflow-y:auto;box-shadow:var(--shadow)}
 .yest-issues-title{font-size:calc((11px)*var(--fsx,1));font-weight:700;color:var(--text);margin-bottom:6px}
 .yest-issue-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border2);font-size:calc((11px)*var(--fsx,1))}
 .yest-issue-row:last-child{border:none}
 .yest-issue-rank{font-size:calc((10px)*var(--fsx,1));font-weight:700;color:var(--muted);min-width:14px}
 .yest-issue-name{flex:1;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.yest-issue-qty{font-weight:700;color:var(--text-sub);min-width:60px;text-align:right;font-size:calc((11px)*var(--fsx,1))}
+.yest-issue-qty{font-weight:700;color:var(--text-sub);min-width:60px;text-align:right;font-size:calc((11px)*var(--nfsx,var(--fsx,1)))}
 .yest-empty{text-align:center;color:var(--muted);font-size:calc((11px)*var(--fsx,1));padding:18px}
 
 /* ═══════════ DASHBOARD / GRIDSTACK ═══════════ */
@@ -161,7 +163,7 @@ body.editing .card-x{display:flex}
 /* card titles */
 .ct{font-size:calc((calc(var(--fs) + 0px))*var(--fsx,1));font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:6px;line-height:1.3;cursor:default}
 .ct::before{content:"";width:3px;height:12px;border-radius:2px;background:var(--accent);flex-shrink:0}
-.ct .sub{font-size:calc((var(--fs-xs))*var(--fsx,1));font-weight:400;color:var(--muted);margin-left:4px}
+.ct .sub{font-size:calc((var(--fs-xs))*var(--nfsx,var(--fsx,1)));font-weight:400;color:var(--muted);margin-left:4px}
 .editable-sub{font-size:calc((var(--fs-xs))*var(--fsx,1));font-weight:400;color:var(--muted);padding:1px 4px;border-radius:2px;outline:none}
 body.editing .editable-sub[contenteditable=true]{background:var(--accent-soft);border:1px dashed var(--warn)}
 
@@ -174,22 +176,22 @@ body.editing .editable-sub[contenteditable=true]{background:var(--accent-soft);b
 .kpi-box:nth-child(4){border-top-color:var(--danger)}
 .kpi-box:nth-child(5){border-top-color:var(--ok)}
 .kpi-label{font-family:var(--ffm);font-size:calc((calc(var(--fs-xs) - 1.5px))*var(--fsx,1));font-weight:600;color:var(--muted);letter-spacing:0.8px;text-transform:uppercase}
-.kpi-value{font-size:calc((var(--kpi-v))*var(--fsx,1));font-weight:700;line-height:1.1;margin-top:4px;letter-spacing:-0.5px}
-.kpi-sub{font-size:calc((var(--fs-xs))*var(--fsx,1));color:var(--muted);margin-top:2px}
+.kpi-value{font-size:calc((var(--kpi-v))*var(--nfsx,var(--fsx,1)));font-weight:700;line-height:1.1;margin-top:4px;letter-spacing:-0.5px}
+.kpi-sub{font-size:calc((var(--fs-xs))*var(--nfsx,var(--fsx,1)));color:var(--muted);margin-top:2px}
 
 /* bars */
 .br{display:flex;align-items:center;gap:6px;margin-bottom:5px}
 .bl{min-width:88px;text-align:right;font-size:calc((var(--fs-sm))*var(--fsx,1));font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bt{flex:1;height:16px;background:var(--border2);border-radius:3px;overflow:hidden}
 .bf{height:100%;border-radius:3px;transition:width 0.4s ease}
-.bv{min-width:48px;text-align:right;font-size:calc((var(--fs-sm))*var(--fsx,1));font-weight:600;color:var(--text-sub)}
-.bpc{min-width:32px;text-align:right;font-size:calc((var(--fs-xs))*var(--fsx,1));color:var(--muted)}
+.bv{min-width:48px;text-align:right;font-size:calc((var(--fs-sm))*var(--nfsx,var(--fsx,1)));font-weight:600;color:var(--text-sub)}
+.bpc{min-width:32px;text-align:right;font-size:calc((var(--fs-xs))*var(--nfsx,var(--fsx,1)));color:var(--muted)}
 
 /* tables */
 .dt{width:100%;border-collapse:collapse;font-size:calc((var(--fs-sm))*var(--fsx,1))}
 .dt th{text-align:left;font-family:var(--ffm);font-size:calc((calc(var(--fs-xs) - 1px))*var(--fsx,1));font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);padding:5px var(--cell-pad);border-bottom:2px solid var(--border)}
 .dt th.r{text-align:right}.dt th.c{text-align:center}
-.dt td{padding:var(--cell-pad);border-bottom:1px solid var(--border2);font-size:calc((var(--fs-sm))*var(--fsx,1))}.dt td.r{text-align:right}.dt td.c{text-align:center}
+.dt td{padding:var(--cell-pad);border-bottom:1px solid var(--border2);font-size:calc((var(--fs-sm))*var(--fsx,1))}.dt td.r{text-align:right;font-size:calc((var(--fs-sm))*var(--nfsx,var(--fsx,1)))}.dt td.c{text-align:center}
 .dt tr:hover td{background:var(--surface2)}
 .rk{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:calc((9px)*var(--fsx,1));font-weight:700}
 .rk1{background:var(--danger);color:#fff}.rk2{background:var(--warn);color:#fff}.rk3{background:var(--border);color:var(--text-sub)}.rkn{background:var(--border2);color:var(--muted)}
@@ -203,8 +205,8 @@ body.editing .editable-sub[contenteditable=true]{background:var(--accent-soft);b
 .trend-col{flex:1;display:flex;flex-direction:column;align-items:center}
 .trend-bw{display:flex;flex-direction:column;align-items:center;height:80px;justify-content:flex-end;width:100%}
 .trend-bar{width:70%;min-width:6px;border-radius:3px 3px 0 0;transition:height 0.4s}
-.trend-val{font-size:calc((9px)*var(--fsx,1));font-weight:700;color:var(--text-sub);min-height:13px;margin-bottom:1px}
-.trend-date{font-size:calc((7px)*var(--fsx,1));color:var(--muted);margin-top:2px;font-weight:500}
+.trend-val{font-size:calc((9px)*var(--nfsx,var(--fsx,1)));font-weight:700;color:var(--text-sub);min-height:13px;margin-bottom:1px}
+.trend-date{font-size:calc((7px)*var(--nfsx,var(--fsx,1)));color:var(--muted);margin-top:2px;font-weight:500}
 .trend-toggle{display:inline-flex;gap:0;margin-left:auto;border:1px solid var(--border);border-radius:4px;overflow:hidden}
 .trend-toggle button{font-size:calc((9px)*var(--fsx,1));padding:2px 8px;border:none;background:var(--surface);color:var(--muted);cursor:pointer;font-family:inherit;font-weight:600;transition:all 0.15s}
 .trend-toggle button.on{background:var(--accent);color:#fff}
@@ -213,9 +215,9 @@ body.editing .editable-sub[contenteditable=true]{background:var(--accent-soft);b
 /* repeat rows */
 .rr{display:flex;align-items:center;gap:10px;padding:var(--row-pad) 0;border-bottom:1px solid var(--border2)}
 .rr:last-child{border:none}
-.rc{font-size:calc((20px)*var(--fsx,1));font-weight:700;color:var(--danger);min-width:30px;text-align:center}
+.rc{font-size:calc((20px)*var(--nfsx,var(--fsx,1)));font-weight:700;color:var(--danger);min-width:30px;text-align:center}
 .ri{flex:1}.rn{font-size:calc((12px)*var(--fsx,1));font-weight:600}.rd{font-size:calc((var(--fs-xs))*var(--fsx,1));color:var(--muted);margin-top:1px}
-.rq{font-size:calc((12px)*var(--fsx,1));font-weight:700;color:var(--text-sub);min-width:55px;text-align:right}
+.rq{font-size:calc((12px)*var(--nfsx,var(--fsx,1)));font-weight:700;color:var(--text-sub);min-width:55px;text-align:right}
 
 /* detail filters */
 .df{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
@@ -262,13 +264,13 @@ body.editing .upload-info{display:inline}
 .yest-detail{margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;box-shadow:var(--shadow);overflow:hidden}
 .yest-detail-head{padding:8px 14px;border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:6px}
 .yest-detail-title{font-size:calc((12px)*var(--fsx,1));font-weight:700;color:var(--text)}
-.yest-detail-cnt{font-size:calc((11px)*var(--fsx,1));color:var(--muted);font-weight:normal}
+.yest-detail-cnt{font-size:calc((11px)*var(--nfsx,var(--fsx,1)));color:var(--muted);font-weight:normal}
 .yest-detail-body{max-height:400px;overflow:auto}
 .yest-detail-body table{width:100%;border-collapse:collapse;font-size:calc((11px)*var(--fsx,1))}
 .yest-detail-body thead th{position:sticky;top:0;background:var(--surface2);text-align:left;padding:6px 10px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--border);font-family:var(--ffm);font-size:calc((10px)*var(--fsx,1));text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap}
 .yest-detail-body th.r{text-align:right}
 .yest-detail-body tbody td{padding:5px 10px;border-bottom:1px solid var(--border2);white-space:nowrap;font-size:calc((11px)*var(--fsx,1))}
-.yest-detail-body tbody td.r{text-align:right;font-weight:600}
+.yest-detail-body tbody td.r{text-align:right;font-weight:600;font-size:calc((11px)*var(--nfsx,var(--fsx,1)))}
 .yest-detail-body tbody tr:nth-child(even){background:var(--zebra)}
 .yest-detail-body tbody tr:hover{background:var(--accent-soft)}
 .yest-detail-body .prod-cell{font-family:var(--ffm);font-size:calc((10.5px)*var(--fsx,1));color:var(--text-sub)}
@@ -309,7 +311,15 @@ body.editing .upload-info{display:inline}
   color:var(--text-sub);border-radius:5px;cursor:pointer;font-size:13px;line-height:1;font-family:inherit;
   display:flex;align-items:center;justify-content:center;transition:all .12s}
 .fp-b:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
-.fp-v{width:44px;text-align:right;font-family:var(--ffm);font-size:11px;font-weight:600;color:var(--text-sub);flex-shrink:0}
+.fp-v{width:62px;text-align:right;font-family:var(--ffm);font-size:11px;font-weight:600;color:var(--text-sub);flex-shrink:0}
+.fp-axis{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.fp-axis button{flex:1;font-size:11.5px;font-weight:600;padding:7px 0;border:none;border-right:1px solid var(--border);
+  background:var(--surface2);color:var(--text-sub);cursor:pointer;font-family:inherit;transition:all .12s}
+.fp-axis button:last-child{border-right:none}
+.fp-axis button.on{background:var(--accent);color:#fff}
+.fp-axis button:not(.on):hover{background:var(--accent-soft);color:var(--accent)}
+.fp-note{font-size:10.5px;line-height:1.5;color:var(--muted);margin-top:6px}
+.fp-note b{color:var(--warn)}
 .fp-v.mod{color:var(--warn)}
 .fp-rng{width:100%;margin:6px 0 2px}
 .fp-grp{border:1px solid var(--border2);border-radius:6px;padding:6px 8px;margin-bottom:8px;background:var(--surface2)}
@@ -349,7 +359,16 @@ body.editing .upload-info{display:inline}
       <label class="fp-chk"><input type="checkbox" id="fpMono" onchange="setMonoSame(this.checked)">숫자·머리글(고정폭)도 같은 글꼴로</label>
     </div>
     <div class="fp-sec">
-      <h4>전체 글자 크기</h4>
+      <h4>조절 대상</h4>
+      <div class="fp-axis" id="fpAxis">
+        <button data-a="b" class="on" onclick="setAxis('b')">글자＋숫자</button>
+        <button data-a="t" onclick="setAxis('t')">글자만</button>
+        <button data-a="n" onclick="setAxis('n')">숫자만</button>
+      </div>
+      <div class="fp-note">「글자만」 을 고르면 라벨·업체명·이슈명만 커지고 수량·건수·비율 같은 <b>숫자는 그대로</b> 유지됩니다.</div>
+    </div>
+    <div class="fp-sec">
+      <h4>전체 크기</h4>
       <div class="fp-row">
         <button class="fp-b" onclick="bumpScale('_g',-1)">−</button>
         <input type="range" class="fp-rng" id="fpG" min="60" max="200" step="1" value="100" oninput="setScale('_g',this.value)">
@@ -410,7 +429,7 @@ body.editing .upload-info{display:inline}
       </button>
       <span class="upload-info" id="uploadInfo">또는 파일을 화면에 드래그</span>
     </div>
-    <span style="font-size:calc((11px)*var(--fsx,1));color:var(--text-sub);font-weight:500" id="fInfo"></span>
+    <span style="font-size:calc((11px)*var(--nfsx,var(--fsx,1)));color:var(--text-sub);font-weight:500" id="fInfo"></span>
   </div>
 </div>
 </div>
@@ -1264,32 +1283,45 @@ const FP_COLS=[
    cols:["날짜","브랜드","업체","복종","품번","구분","수량","이슈"]}
 ];
 
+/* 배율은 글자(t)·숫자(n) 두 축. 값은 {t,n} 객체로 보관한다.
+   숫자 축이 걸리는 곳 : KPI 수치, 막대/추이 값, 표의 우측정렬(수량·건수) 셀,
+                        반복이슈 회수, 날짜·건수 표기 */
 const FCFG_KEY="_fs2";
-let FCFG={ff:"",mono:false,g:100,reg:{},col:{}};
+let FCFG={ff:"",mono:false,g:{t:100,n:100},reg:{},col:{}};
 try{FCFG=Object.assign(FCFG,JSON.parse(localStorage.getItem(FCFG_KEY)||"{}"))}catch(e){}
 FCFG.reg=FCFG.reg||{}; FCFG.col=FCFG.col||{};
+/* v43 초기버전(단일 배율 숫자값) 마이그레이션 */
+const _pair=v=>(typeof v==="number")?{t:v,n:v}:Object.assign({t:100,n:100},v||{});
+FCFG.g=_pair(FCFG.g);
+Object.keys(FCFG.reg).forEach(k=>FCFG.reg[k]=_pair(FCFG.reg[k]));
+Object.keys(FCFG.col).forEach(g=>Object.keys(FCFG.col[g]).forEach(i=>FCFG.col[g][i]=_pair(FCFG.col[g][i])));
+
+let FP_AXIS="b";   // b=글자+숫자 / t=글자만 / n=숫자만
 
 function saveFontCfg(){try{localStorage.setItem(FCFG_KEY,JSON.stringify(FCFG))}catch(e){}}
 const clampPct=v=>Math.max(40,Math.min(300,Math.round(+v)||100));
-function regPct(k){return FCFG.reg[k]||100}
-function colPct(g,i){return (FCFG.col[g]||{})[i]||100}
+function regPct(k){return _pair(FCFG.reg[k])}
+function colPct(g,i){return _pair((FCFG.col[g]||{})[i])}
+const _isDef=p=>p.t===100&&p.n===100;
 
 function applyFontCfg(){
   const b=document.body;
   b.style.setProperty("--ff",FCFG.ff||FONT_LIST[0][0]);
   b.style.setProperty("--ffm",FCFG.mono?(FCFG.ff||FONT_LIST[0][0]):MONO_DEF);
-  b.style.setProperty("--g",(FCFG.g||100)/100);
+  b.style.setProperty("--g",FCFG.g.t/100);
+  b.style.setProperty("--gn",FCFG.g.n/100);
 
+  const rule=(sel,t,n)=>`${sel}{--fsx:calc(var(--g)*${t.toFixed(3)});--nfsx:calc(var(--gn)*${n.toFixed(3)})}\n`;
   let css="";
   FP_REGIONS.forEach(r=>{
     const p=regPct(r.k);
-    if(p!==100) css+=`${r.sel}{--fsx:calc(var(--g)*${(p/100).toFixed(3)})}\n`;
+    if(!_isDef(p)) css+=rule(r.sel,p.t/100,p.n/100);
   });
   FP_COLS.forEach(g=>{
-    const base=regPct(g.reg)/100;
+    const base=regPct(g.reg);
     g.cols.forEach((nm,i)=>{
       const p=colPct(g.k,i);
-      if(p!==100) css+=`${g.sel(i+1)}{--fsx:calc(var(--g)*${(base*p/100).toFixed(3)})}\n`;
+      if(!_isDef(p)) css+=rule(g.sel(i+1),base.t*p.t/1e4,base.n*p.n/1e4);
     });
   });
   let st=document.getElementById("fontRules");
@@ -1312,25 +1344,44 @@ function setMonoSame(v){FCFG.mono=!!v;saveFontCfg();applyFontCfg()}
 
 /* key 형식 : "_g" = 전체 / "r:영역키" = 영역 / "c:그룹키:인덱스" = 컬럼 */
 function getScale(key){
-  if(key==="_g")return FCFG.g||100;
+  if(key==="_g")return FCFG.g;
   const p=key.split(":");
-  if(p[0]==="r")return regPct(p[1]);
-  return colPct(p[1],+p[2]);
+  return (p[0]==="r")?regPct(p[1]):colPct(p[1],+p[2]);
 }
+function putScale(key,val){
+  if(key==="_g"){FCFG.g=val;return}
+  const p=key.split(":");
+  if(p[0]==="r"){ if(_isDef(val))delete FCFG.reg[p[1]]; else FCFG.reg[p[1]]=val; }
+  else{ FCFG.col[p[1]]=FCFG.col[p[1]]||{};
+        if(_isDef(val))delete FCFG.col[p[1]][+p[2]]; else FCFG.col[p[1]][+p[2]]=val; }
+}
+/* 현재 선택된 축(글자/숫자/둘다)에만 값을 적용한다 */
 function setScale(key,v){
   v=clampPct(v);
-  if(key==="_g")FCFG.g=v;
-  else{
-    const p=key.split(":");
-    if(p[0]==="r"){ if(v===100)delete FCFG.reg[p[1]]; else FCFG.reg[p[1]]=v; }
-    else{ FCFG.col[p[1]]=FCFG.col[p[1]]||{};
-          if(v===100)delete FCFG.col[p[1]][+p[2]]; else FCFG.col[p[1]][+p[2]]=v; }
-  }
+  const cur=Object.assign({},getScale(key));
+  if(FP_AXIS!=="n")cur.t=v;
+  if(FP_AXIS!=="t")cur.n=v;
+  putScale(key,cur);
   saveFontCfg();applyFontCfg();updateFontPanelValues();
 }
 function bumpScale(key,dir){
   const step=(window.event&&window.event.shiftKey)?10:5;
-  setScale(key,getScale(key)+dir*step);
+  const cur=Object.assign({},getScale(key));
+  if(FP_AXIS!=="n")cur.t=clampPct(cur.t+dir*step);
+  if(FP_AXIS!=="t")cur.n=clampPct(cur.n+dir*step);
+  putScale(key,cur);
+  saveFontCfg();applyFontCfg();updateFontPanelValues();
+}
+function setAxis(a){
+  FP_AXIS=a;
+  document.querySelectorAll("#fpAxis button").forEach(b=>b.classList.toggle("on",b.dataset.a===a));
+  updateFontPanelValues();
+}
+/* 표시값 : 글자·숫자가 같으면 한 값, 다르면 "글120 / 숫100" */
+function fmtScale(p){
+  if(FP_AXIS==="t")return p.t+"%";
+  if(FP_AXIS==="n")return p.n+"%";
+  return p.t===p.n?p.t+"%":("글"+p.t+"/숫"+p.n);
 }
 
 function fpRow(key,name,sub){
@@ -1347,6 +1398,7 @@ function buildFontPanel(){
   fs.innerHTML=FONT_LIST.map(([v,l])=>`<option value="${v.replace(/"/g,"&quot;")}">${l}</option>`).join("");
   fs.value=FCFG.ff||FONT_LIST[0][0];
   document.getElementById("fpMono").checked=!!FCFG.mono;
+  document.querySelectorAll("#fpAxis button").forEach(b=>b.classList.toggle("on",b.dataset.a===FP_AXIS));
   document.getElementById("fpRegions").innerHTML=
     FP_REGIONS.map(r=>fpRow("r:"+r.k,r.nm)).join("");
   document.getElementById("fpCols").innerHTML=
@@ -1356,15 +1408,15 @@ function buildFontPanel(){
 }
 
 function updateFontPanelValues(){
-  const g=FCFG.g||100;
   const gv=document.getElementById("fpGv"),gr=document.getElementById("fpG");
-  if(gv)gv.textContent=g+"%";
-  if(gr&&+gr.value!==g)gr.value=g;
+  if(gv)gv.textContent=fmtScale(FCFG.g);
+  const slid=(FP_AXIS==="n")?FCFG.g.n:FCFG.g.t;
+  if(gr&&+gr.value!==slid)gr.value=slid;
   document.querySelectorAll(".fp-row[data-fk]").forEach(row=>{
-    const v=getScale(row.dataset.fk);
+    const p=getScale(row.dataset.fk);
     const el=row.querySelector(".fp-v");
-    el.textContent=v+"%";
-    el.classList.toggle("mod",v!==100);
+    el.textContent=fmtScale(p);
+    el.classList.toggle("mod",!_isDef(p));
   });
 }
 
@@ -1378,7 +1430,7 @@ function toggleFontPanel(force){
 
 function resetFontCfg(){
   if(!confirm("글꼴·글자 크기 설정을 모두 초기화할까요?"))return;
-  FCFG={ff:"",mono:false,g:100,reg:{},col:{}};
+  FCFG={ff:"",mono:false,g:{t:100,n:100},reg:{},col:{}};
   saveFontCfg();applyFontCfg();buildFontPanel();
 }
 
