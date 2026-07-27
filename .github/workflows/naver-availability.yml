@@ -1,0 +1,70 @@
+name: 네이버 예약 시간대 감시
+
+on:
+  schedule:
+    # 5분마다 실행 (GitHub 부하에 따라 몇 분 지연될 수 있음)
+    - cron: "*/5 * * * *"
+  workflow_dispatch:      # Actions 탭에서 수동 실행 버튼
+    inputs:
+      debug:
+        description: "디버그 모드(스크린샷·API응답 저장, 알림 없음)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: naver-availability
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write   # 자리가 나면 이슈를 만들어 저장소 주인 이메일로 알림
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: scripts/naver-monitor
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 직전 상태(state.json)를 복원해서 "새로 생긴 자리"만 알림 → 중복 알림 방지
+      - name: 이전 상태 복원
+        uses: actions/cache@v4
+        with:
+          path: scripts/naver-monitor/state.json
+          key: naver-state-${{ github.run_id }}
+          restore-keys: |
+            naver-state-
+
+      - name: 의존성 설치
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: 예약가능 검사 + 알림
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [ "${{ inputs.debug }}" = "true" ]; then
+            node check.mjs --debug --no-notify
+          else
+            node check.mjs
+          fi
+
+      # 판별에 문제가 있을 때 확인할 수 있게, 실행마다 디버그 산출물 업로드(선택)
+      - name: 디버그 산출물 업로드
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: naver-debug-${{ github.run_id }}
+          path: scripts/naver-monitor/debug/
+          if-no-files-found: ignore
+          retention-days: 3

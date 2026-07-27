@@ -1,0 +1,14 @@
+{
+  "name": "naver-availability-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "네이버 모바일 예약 시간대 예약가능 감시 매크로",
+  "scripts": {
+    "check": "node check.mjs",
+    "debug": "node check.mjs --debug --no-notify"
+  },
+  "dependencies": {
+    "playwright": "^1.48.0"
+  }
+}
