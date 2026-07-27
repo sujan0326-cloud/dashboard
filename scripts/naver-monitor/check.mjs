@@ -135,12 +135,29 @@ async function checkOne(browser, target, date, bookingPath) {
 
   let error = null;
   try {
-    await page.goto(url, { waitUntil: "networkidle", timeout: 60000 });
+    // networkidle 은 네이버처럼 백그라운드 통신이 잦은 페이지에서 잘 안 끝난다.
+    // domcontentloaded 로 빠르게 진입한 뒤, 시간대 UI가 렌더될 때까지 따로 기다린다.
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45000 });
   } catch (e) {
     error = `goto: ${e.message}`;
   }
-  // SPA가 시간대를 그릴 시간을 준다.
-  await page.waitForTimeout(4000);
+  // 네트워크가 잠잠해질 기회를 최대 8초만 준다(안 끝나도 계속 진행).
+  await page.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => {});
+  // 시간대(HH:MM) 또는 '마감/없음' 안내가 화면에 나타나면 렌더 완료로 보고 진행.
+  await page
+    .waitForFunction(
+      () => {
+        const t = document.body ? document.body.innerText : "";
+        return (
+          /\b([01]?\d|2[0-3]):[0-5]\d\b/.test(t) ||
+          /예약\s*마감|가능한?\s*(시간|일정|날짜)|없습니다|매진/.test(t)
+        );
+      },
+      { timeout: 15000 }
+    )
+    .catch(() => {});
+  // 마지막 렌더 안정화 여유.
+  await page.waitForTimeout(1500);
 
   let detection = { available: [], soldout: [], noAvail: false, textSample: "" };
   try {
