@@ -12,8 +12,9 @@
  *  node check.mjs --debug        # 스크린샷/캡처된 API 응답을 debug/ 폴더에 저장
  *  node check.mjs --no-notify    # 알림 없이 판별 결과만 출력 (테스트용)
  *
- * 필요한 환경변수(알림용):
- *  TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+ * 알림 경로(있는 것 모두 사용):
+ *  1) GitHub 이슈 → 저장소 주인에게 이메일 자동 발송 (GITHUB_TOKEN, 설정 불필요 · 기본)
+ *  2) 텔레그램 푸시 (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID · 선택)
  */
 
 import { chromium } from "playwright";
@@ -206,6 +207,48 @@ function esc(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+// ── GitHub 이슈 알림 (저장소 주인에게 이메일 자동 발송) ────────────────
+async function sendGitHubIssue(hits) {
+  const token = process.env.GITHUB_TOKEN;
+  const repo = process.env.GITHUB_REPOSITORY; // "owner/repo" — Actions에서 자동 주입
+  if (!token || !repo) {
+    console.warn("⚠️  GITHUB_TOKEN / GITHUB_REPOSITORY 가 없어 이슈 알림을 건너뜁니다.");
+    return false;
+  }
+  const owner = repo.split("/")[0];
+  const title = `🎉 네이버 예약 자리 발생 (${hits.length}건) — ${[...new Set(hits.map((h) => h.date))].join(", ")}`;
+  const lines = [
+    `@${owner} 예약 가능한 자리가 생겼습니다! 아래 링크로 **바로** 예약하세요. (자리는 금방 사라질 수 있어요)`,
+    "",
+  ];
+  for (const h of hits) {
+    lines.push(`### ${h.name}`);
+    lines.push(`- 📅 ${h.date} (${weekdayKST(h.date)})`);
+    lines.push(`- ⏰ 예약가능: ${h.availableTimes.slice(0, 20).join(", ") || "시간대 확인"}`);
+    lines.push(`- 🔗 [바로 예약하기](${h.url})`);
+    lines.push("");
+  }
+  lines.push(`<sub>자동 감시 매크로 · ${new Date(Date.now()).toISOString()}</sub>`);
+
+  const res = await fetch(`https://api.github.com/repos/${repo}/issues`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      "Content-Type": "application/json",
+      "User-Agent": "naver-monitor",
+    },
+    body: JSON.stringify({ title, body: lines.join("\n") }),
+  });
+  if (!res.ok) {
+    console.error("❌ GitHub 이슈 생성 실패:", res.status, await res.text().catch(() => ""));
+    return false;
+  }
+  const j = await res.json();
+  console.log("✅ GitHub 이슈 생성:", j.html_url);
+  return true;
+}
+
 function composeMessage(hits) {
   const lines = ["🎉 <b>네이버 예약 자리가 생겼어요!</b>", ""];
   for (const h of hits) {
@@ -269,6 +312,8 @@ async function main() {
   }
 
   if (hits.length && !NO_NOTIFY) {
+    // 두 경로 모두 시도 — 설정된 것만 실제로 발송된다.
+    await sendGitHubIssue(hits);
     await sendTelegram(composeMessage(hits));
   } else if (hits.length && NO_NOTIFY) {
     console.log("\n(--no-notify) 알림 대상:\n" + composeMessage(hits).replace(/<[^>]+>/g, ""));

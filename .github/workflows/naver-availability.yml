@@ -17,6 +17,7 @@ concurrency:
 
 permissions:
   contents: read
+  issues: write   # 자리가 나면 이슈를 만들어 저장소 주인 이메일로 알림
 
 jobs:
   check:
@@ -47,6 +48,7 @@ jobs:
 
       - name: 예약가능 검사 + 알림
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
