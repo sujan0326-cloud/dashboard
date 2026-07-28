@@ -1,10 +1,10 @@
 name: 네이버 예약 시간대 감시
 
 on:
-  schedule:
-    # 5분마다 실행 (GitHub 부하에 따라 몇 분 지연될 수 있음)
-    - cron: "*/5 * * * *"
-  workflow_dispatch:      # Actions 탭에서 수동 실행 버튼
+  # ⏸️ 자동 감시 중지됨(예약 완료). 다시 켜려면 아래 schedule 두 줄의 주석(#)을 지우세요.
+  # schedule:
+  #   - cron: "*/5 * * * *"   # 5분마다 실행
+  workflow_dispatch:      # Actions 탭에서 수동 실행 버튼(테스트 등)은 계속 가능
     inputs:
       debug:
         description: "디버그 모드(스크린샷·API응답 저장, 알림 없음)"
