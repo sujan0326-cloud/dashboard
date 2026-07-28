@@ -1,6 +1,7 @@
 {
   "timezone": "Asia/Seoul",
   "bookingPath": 12,
+  "ntfyTopic": "k2dash-naver-alert-9f3ac7b2e1",
   "targets": [
     {
       "name": "[48개월~10세] 거북이피자&제주바다블루레몬",

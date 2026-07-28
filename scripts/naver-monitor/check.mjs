@@ -30,6 +30,7 @@ const DEBUG_DIR = path.join(__dirname, "debug");
 const args = new Set(process.argv.slice(2));
 const DEBUG = args.has("--debug");
 const NO_NOTIFY = args.has("--no-notify");
+const TEST_NOTIFY = args.has("--test-notify"); // 실제 검사 없이 테스트 알림만 보냄
 
 const MOBILE_UA =
   "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 " +
@@ -220,6 +221,41 @@ async function sendTelegram(text) {
   return true;
 }
 
+// ── ntfy.sh 휴대폰 푸시 (계정/토큰 불필요) ─────────────────────────────
+// config.json 의 ntfyTopic(또는 NTFY_TOPIC 환경변수)로 지정한 토픽에 POST 하면
+// 그 토픽을 구독한 ntfy 앱으로 즉시 푸시가 온다.
+async function sendNtfy(hits, topic) {
+  const t = process.env.NTFY_TOPIC || topic;
+  if (!t) {
+    console.warn("⚠️  ntfyTopic 이 없어 ntfy 푸시를 건너뜁니다.");
+    return false;
+  }
+  const body = hits
+    .map(
+      (h) =>
+        `${h.name}\n${h.date}(${weekdayKST(h.date)}) 예약가능: ` +
+        `${h.availableTimes.slice(0, 10).join(", ") || "시간대 확인"}\n${h.url}`
+    )
+    .join("\n\n");
+  // 주의: ntfy 헤더 값은 ASCII만 안전하므로 제목은 영문, 한글 내용은 body 에 담는다.
+  const res = await fetch(`https://ntfy.sh/${encodeURIComponent(t)}`, {
+    method: "POST",
+    headers: {
+      Title: "Naver booking open!",
+      Priority: "high",
+      Tags: "tada",
+      Click: hits[0]?.url || "https://m.booking.naver.com",
+    },
+    body,
+  });
+  if (!res.ok) {
+    console.error("❌ ntfy 전송 실패:", res.status, await res.text().catch(() => ""));
+    return false;
+  }
+  console.log(`✅ ntfy 푸시 전송 완료 (topic: ${t})`);
+  return true;
+}
+
 function esc(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
@@ -291,6 +327,21 @@ async function main() {
   const prevState = readJSON(STATE_PATH, {});
   const bookingPath = config.bookingPath ?? 12;
 
+  // 테스트 모드: 실제 검사 없이 알림 채널만 점검한다(폰 푸시가 오는지 확인용).
+  if (TEST_NOTIFY) {
+    const sample = config.targets.slice(0, 1).map((t) => ({
+      name: `[테스트] ${t.name}`,
+      date: t.dates[0],
+      url: buildUrl(t, t.dates[0], bookingPath),
+      availableTimes: ["10:00", "14:00"],
+    }));
+    console.log("🔔 테스트 알림을 전송합니다(ntfy · 텔레그램)…");
+    await sendNtfy(sample, config.ntfyTopic);
+    await sendTelegram(composeMessage(sample));
+    console.log("테스트 완료. 위 채널에 '테스트' 알림이 도착했는지 확인하세요.");
+    return;
+  }
+
   const browser = await chromium.launch({ args: ["--no-sandbox"] });
   const results = [];
   try {
@@ -329,8 +380,9 @@ async function main() {
   }
 
   if (hits.length && !NO_NOTIFY) {
-    // 두 경로 모두 시도 — 설정된 것만 실제로 발송된다.
+    // 세 경로 모두 시도 — 설정된 것만 실제로 발송된다.
     await sendGitHubIssue(hits);
+    await sendNtfy(hits, config.ntfyTopic);
     await sendTelegram(composeMessage(hits));
   } else if (hits.length && NO_NOTIFY) {
     console.log("\n(--no-notify) 알림 대상:\n" + composeMessage(hits).replace(/<[^>]+>/g, ""));

@@ -10,6 +10,10 @@ on:
         description: "디버그 모드(스크린샷·API응답 저장, 알림 없음)"
         type: boolean
         default: false
+      test:
+        description: "테스트 알림 보내기(ntfy·텔레그램으로 테스트 푸시)"
+        type: boolean
+        default: false
 
 concurrency:
   group: naver-availability
@@ -52,7 +56,9 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          if [ "${{ inputs.debug }}" = "true" ]; then
+          if [ "${{ inputs.test }}" = "true" ]; then
+            node check.mjs --test-notify
+          elif [ "${{ inputs.debug }}" = "true" ]; then
             node check.mjs --debug --no-notify
           else
             node check.mjs
