@@ -238,11 +238,14 @@ async function sendNtfy(hits, topic, opts = {}) {
     )
     .join("\n\n");
   const body = opts.intro ? `${opts.intro}\n\n${detail}` : detail;
-  // 주의: ntfy 헤더 값은 ASCII만 안전하므로 제목은 영문, 한글 내용은 body 에 담는다.
+  // ntfy 헤더 값은 ASCII(Latin-1)만 가능 → 제목의 비ASCII 문자는 제거해 인코딩 에러를 막는다.
+  const asciiTitle = (opts.title || "Naver booking OPEN - real")
+    .replace(/[^\x00-\xFF]/g, "")
+    .trim() || "Naver booking";
   const res = await fetch(`https://ntfy.sh/${encodeURIComponent(t)}`, {
     method: "POST",
     headers: {
-      Title: opts.title || "Naver booking OPEN - real",
+      Title: asciiTitle,
       Priority: opts.priority || "high",
       Tags: opts.tags || "tada",
       Click: hits[0]?.url || "https://m.booking.naver.com",
@@ -341,8 +344,8 @@ async function main() {
     }));
     console.log("🔔 테스트 알림을 전송합니다(ntfy · 텔레그램)…");
     await sendNtfy(sample, config.ntfyTopic, {
-      // ntfy 제목 헤더는 ASCII만 안전 → 영문 [TEST] 로 확실히 구분
-      title: "[TEST] 테스트 알림 - not real",
+      // ntfy 제목 헤더는 ASCII만 가능 → 영문 [TEST] 로 표기(한글은 본문 intro 에)
+      title: "[TEST] not a real opening",
       intro:
         "🔔 [테스트 알림] 이것은 실제 예약 자리가 아닙니다.\n" +
         "알림이 정상적으로 오는지 점검하는 테스트입니다. (아래 값은 예시)",
