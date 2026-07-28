@@ -224,26 +224,27 @@ async function sendTelegram(text) {
 // ── ntfy.sh 휴대폰 푸시 (계정/토큰 불필요) ─────────────────────────────
 // config.json 의 ntfyTopic(또는 NTFY_TOPIC 환경변수)로 지정한 토픽에 POST 하면
 // 그 토픽을 구독한 ntfy 앱으로 즉시 푸시가 온다.
-async function sendNtfy(hits, topic) {
+async function sendNtfy(hits, topic, opts = {}) {
   const t = process.env.NTFY_TOPIC || topic;
   if (!t) {
     console.warn("⚠️  ntfyTopic 이 없어 ntfy 푸시를 건너뜁니다.");
     return false;
   }
-  const body = hits
+  const detail = hits
     .map(
       (h) =>
         `${h.name}\n${h.date}(${weekdayKST(h.date)}) 예약가능: ` +
         `${h.availableTimes.slice(0, 10).join(", ") || "시간대 확인"}\n${h.url}`
     )
     .join("\n\n");
+  const body = opts.intro ? `${opts.intro}\n\n${detail}` : detail;
   // 주의: ntfy 헤더 값은 ASCII만 안전하므로 제목은 영문, 한글 내용은 body 에 담는다.
   const res = await fetch(`https://ntfy.sh/${encodeURIComponent(t)}`, {
     method: "POST",
     headers: {
-      Title: "Naver booking open!",
-      Priority: "high",
-      Tags: "tada",
+      Title: opts.title || "Naver booking OPEN - real",
+      Priority: opts.priority || "high",
+      Tags: opts.tags || "tada",
       Click: hits[0]?.url || "https://m.booking.naver.com",
     },
     body,
@@ -302,8 +303,11 @@ async function sendGitHubIssue(hits) {
   return true;
 }
 
-function composeMessage(hits) {
-  const lines = ["🎉 <b>네이버 예약 자리가 생겼어요!</b>", ""];
+function composeMessage(hits, opts = {}) {
+  const header = opts.isTest
+    ? "🔔 <b>[테스트 알림] 실제 예약 자리가 아닙니다</b>\n(알림이 잘 오는지 점검하는 테스트입니다)"
+    : "🎉 <b>네이버 예약 자리가 생겼어요!</b>";
+  const lines = [header, ""];
   for (const h of hits) {
     const wd = weekdayKST(h.date);
     const times = h.availableTimes.slice(0, 12).join(", ") + (h.availableTimes.length > 12 ? " …" : "");
@@ -330,15 +334,22 @@ async function main() {
   // 테스트 모드: 실제 검사 없이 알림 채널만 점검한다(폰 푸시가 오는지 확인용).
   if (TEST_NOTIFY) {
     const sample = config.targets.slice(0, 1).map((t) => ({
-      name: `[테스트] ${t.name}`,
+      name: `[테스트·예시] ${t.name}`,
       date: t.dates[0],
       url: buildUrl(t, t.dates[0], bookingPath),
-      availableTimes: ["10:00", "14:00"],
+      availableTimes: ["(테스트값)"],
     }));
     console.log("🔔 테스트 알림을 전송합니다(ntfy · 텔레그램)…");
-    await sendNtfy(sample, config.ntfyTopic);
-    await sendTelegram(composeMessage(sample));
-    console.log("테스트 완료. 위 채널에 '테스트' 알림이 도착했는지 확인하세요.");
+    await sendNtfy(sample, config.ntfyTopic, {
+      // ntfy 제목 헤더는 ASCII만 안전 → 영문 [TEST] 로 확실히 구분
+      title: "[TEST] 테스트 알림 - not real",
+      intro:
+        "🔔 [테스트 알림] 이것은 실제 예약 자리가 아닙니다.\n" +
+        "알림이 정상적으로 오는지 점검하는 테스트입니다. (아래 값은 예시)",
+      tags: "test_tube",
+    });
+    await sendTelegram(composeMessage(sample, { isTest: true }));
+    console.log("테스트 완료. 위 채널에 '[테스트]' 알림이 도착했는지 확인하세요.");
     return;
   }
 
