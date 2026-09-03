@@ -277,6 +277,14 @@ body.editing .upload-info{display:inline}
 .yest-detail-body .sup-cell{max-width:120px;overflow:hidden;text-overflow:ellipsis}
 .yest-detail-empty{padding:20px;text-align:center;color:var(--muted);font-size:calc((11px)*var(--fsx,1))}
 
+/* 전일 이슈 현황 숨기기 */
+.yest-section.yest-hidden{display:none}
+.yest-head{position:relative}
+.yest-x{position:absolute;right:10px;top:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:6px;width:22px;height:22px;font-size:11px;cursor:pointer;line-height:1}
+.yest-x:hover{color:var(--danger);border-color:var(--danger)}
+.yest-restore{display:none;margin:0 0 10px;padding:6px 12px;border:1px dashed var(--border);border-radius:8px;background:var(--surface);color:var(--muted);font-size:11px;cursor:pointer;width:fit-content}
+.yest-restore.on{display:block}
+.yest-restore:hover{color:var(--accent);border-color:var(--accent)}
 /* 누적 현황 접기 */
 .sec-head-collapsible{cursor:pointer;user-select:none}
 .sec-head-collapsible:hover .title{color:var(--accent)}
@@ -441,6 +449,7 @@ body.editing .upload-info{display:inline}
   <div class="yest-head">
     <div class="title">전일 이슈 현황</div>
     <select class="yest-date-select" id="yestDateSel" onchange="setYestDate(this.value)"></select>
+    <button class="yest-x" title="이 카드 숨기기" onclick="toggleYest(true)">✕</button>
   </div>
   <div class="yest-grid">
     <div class="yest-kpi" id="yestKpi"></div>
@@ -454,6 +463,8 @@ body.editing .upload-info{display:inline}
     <div class="yest-detail-body" id="yestDetailBody"></div>
   </div>
 </div>
+
+<div class="yest-restore" id="yestRestore" onclick="toggleYest(false)">+ 전일 이슈 현황 보기</div>
 
 <!-- 누적 현황 헤더 -->
 <div class="sec-head sec-head-collapsible collapsed" id="cumHead" onclick="toggleCumulative()">
@@ -618,7 +629,9 @@ function loadData(data,fileName){
   DATES=[...new Set(RAW.map(r=>r.d))].sort();
   DSET=new Set(DATES);
   BRANDS=[...new Set(RAW.map(r=>r.brand))].sort();
-  selD=new Set(DATES);
+  // 기본 조회 범위 = 한 달. 공유 링크에 ?m=2026-09 가 있으면 그 달, 없으면 자료의
+  // 마지막 달. 전 기간을 한꺼번에 보이던 것을 바꿨다 — 보는 사람은 달력에서 바꿀 수 있다.
+  selD=new Set(defaultMonthDates());
   selB.clear();
   dFDates.clear();
   dF={sup:"전체",brand:"전체",type:"전체"};
@@ -689,6 +702,36 @@ const ALERT_EMAIL=""; // ← 알림 받을 이메일 (Apps Script에서 설정)
 // 구글 시트의 "웹에 게시" CSV URL을 여기에 붙여넣으세요
 // 빈 문자열이면 자동 동기화 비활성화 (수동 엑셀 업로드만 사용)
 const SHEET_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQlKbSzXBoEYS-f8zsi2BC1ZcN64PZddP4NidJ5lw_0FOia9IU94qAhOyJiTkAYfq-uVqvmWu0BGkw6/pub?gid=0&single=true&output=csv"; // ← 예: "https://docs.google.com/spreadsheets/d/e/xxxxx/pub?output=csv"
+
+function toggleYest(hide){
+  document.getElementById("yestSection").classList.toggle("yest-hidden",hide);
+  document.getElementById("yestRestore").classList.toggle("on",hide);
+  try{localStorage.setItem("_yh",hide?"1":"0")}catch(e){}
+}
+(function(){
+  const q=new URLSearchParams(location.search).get("yest");
+  let hide=false;
+  try{hide=localStorage.getItem("_yh")==="1"}catch(e){}
+  if(q==="0") hide=true; else if(q==="1") hide=false;
+  if(hide) document.addEventListener("DOMContentLoaded",()=>toggleYest(true));
+})();
+
+function defaultMonthDates(){
+  const q=new URLSearchParams(location.search).get("m");   // "2026-09"
+  const monthOf=d=>parseInt(d.split("/")[0]);
+  const has=m=>DATES.some(d=>monthOf(d)===m);
+  let mm=null;
+  if(q&&/^\d{4}-\d{1,2}$/.test(q)) mm=parseInt(q.split("-")[1]);
+  if(mm===null||!has(mm)){
+    // 주소에 달이 없으면 오늘이 속한 달. 그 달 자료가 아직 없으면 자료의 마지막 달.
+    // ('26/7' 처럼 잘못 적힌 날짜는 달이 1~12 를 벗어나므로 건너뛴다)
+    const now=new Date().getMonth()+1;
+    if(has(now)) mm=now;
+    else{const valid=DATES.map(monthOf).filter(m=>m>=1&&m<=12);mm=valid.length?Math.max(...valid):null}
+  }
+  const inMonth=DATES.filter(d=>monthOf(d)===mm);
+  return inMonth.length?inMonth:DATES;
+}
 
 async function loadFromSheet(){
   if(!SHEET_URL) return false;
