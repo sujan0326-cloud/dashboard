@@ -42,7 +42,8 @@ td{padding:7px 9px;font-size:12.5px;vertical-align:middle;text-align:center}
 .tip{position:relative;display:inline-block}
 .tip .tt{display:none;position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);z-index:30;padding:6px 10px;border-radius:6px;background:#212c31;color:#fff;font-size:11px;font-weight:500;line-height:1.45;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.2)}
 .tip:hover .tt{display:block}
-.dd{position:absolute;z-index:40;padding:7px;background:#fff;border:1px solid #cfe0e6;border-radius:7px;box-shadow:0 6px 18px rgba(0,0,0,.16);max-height:280px;overflow:auto;min-width:150px;text-align:left}
+.dd{position:absolute;z-index:40;padding:7px;background:#fff;border:1px solid #cfe0e6;border-radius:7px;box-shadow:0 6px 18px rgba(0,0,0,.16);max-height:300px;overflow:hidden;min-width:150px;text-align:left;display:flex;flex-direction:column}
+.dd .ddl{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 .sbox{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .sbox input{flex:1 1 260px;max-width:420px;font:inherit;font-size:12.5px;padding:7px 11px;border:1px solid #cfe0e6;border-radius:7px;color:#212c31;background:#fff}
 .sbox input:focus{outline:2px solid #cfe0e6;outline-offset:1px}
@@ -63,7 +64,7 @@ td{padding:7px 9px;font-size:12.5px;vertical-align:middle;text-align:center}
 .cal .cn{margin-top:6px;font-size:10px;color:#7d8b91;text-align:center}
 .dd label{display:block;font-size:12px;padding:3px 4px;white-space:nowrap;cursor:pointer}
 .dd label:hover{background:#f2f7f8}
-.dd .ddb{display:flex;gap:6px;margin-top:6px;border-top:1px solid #e0e5e7;padding-top:6px;position:sticky;bottom:0;background:#fff}
+.dd .ddb{flex:0 0 auto;display:flex;gap:6px;margin-top:6px;border-top:1px solid #e0e5e7;padding-top:7px;background:#fff}
 .dd .ddb button{font:inherit;font-size:10.5px;font-weight:600;color:#25566a;background:#eef4f6;border:1px solid #cfe0e6;border-radius:5px;padding:3px 9px;cursor:pointer}
 .bar{flex-grow:1;display:flex;height:14px;border-radius:4px;overflow:hidden;background:#f1f4f5;min-width:120px}
 .lg{margin:10px 0 0;display:flex;align-items:center;gap:15px;font-size:11px;color:#4f5c63;flex-wrap:wrap}
@@ -217,9 +218,9 @@ function openDD(sp){
   var opts=optsOf(DSET[tbl]||[], key);
   var sel=(S.filt[tbl]||{})[key]||[];
   var dd=document.createElement('div'); dd.className='dd';
-  dd.innerHTML=opts.map(function(o){
+  dd.innerHTML='<div class="ddl">'+opts.map(function(o){
     return '<label><input type="checkbox" value="'+esc(o)+'"'+(sel.length===0||sel.indexOf(o)>=0?' checked':'')+'> '+esc(o)+'</label>';
-  }).join('')+'<div class="ddb"><button data-a="all"></button><button data-a="ok">적용</button></div>';
+  }).join('')+'</div><div class="ddb"><button data-a="all"></button><button data-a="ok">적용</button></div>';
   document.body.appendChild(dd);
   var b=sp.getBoundingClientRect();
   dd.style.left=Math.max(6,Math.min(b.left+window.scrollX, window.innerWidth-dd.offsetWidth-10))+'px';
@@ -392,9 +393,9 @@ function openChip(btn){
     });
   } else {
     var opts=uniq(D.log.map(function(r){return r[c];})), sel=S[c];
-    dd.innerHTML=opts.map(function(o){
+    dd.innerHTML='<div class="ddl">'+opts.map(function(o){
       return '<label><input type="checkbox" value="'+esc(o)+'"'+(sel.length===0||sel.indexOf(o)>=0?' checked':'')+'> '+esc(o)+'</label>';}).join('')+
-      '<div class="ddb"><button data-a="all"></button><button data-a="ok">적용</button></div>';
+      '</div><div class="ddb"><button data-a="all"></button><button data-a="ok">적용</button></div>';
     dd.addEventListener('change',function(){syncAll(dd);});
     dd.addEventListener('click',function(e){
       var a=e.target.dataset&&e.target.dataset.a; if(!a) return;
